@@ -13,9 +13,10 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Video, label: 'Sources', path: '/sources' },
   { icon: Lightbulb, label: 'Insights', path: '/insights' },
+  { icon: BookOpen, label: 'Enseignements', path: '/teachings' },
   { icon: Calendar, label: 'Calendar', path: '/calendar' },
   { icon: Settings, label: 'Settings', path: '/settings' },
 ];
@@ -49,8 +50,8 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-            (item.path !== '/' && location.pathname.startsWith(item.path));
+        const isActive = location.pathname === item.path || 
+            (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
           
           return (
             <NavLink
