@@ -1,0 +1,89 @@
+import { NavLink, useLocation } from 'react-router-dom';
+import { 
+  LayoutDashboard, 
+  Video, 
+  Lightbulb, 
+  Calendar, 
+  Settings,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
+
+const navItems = [
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+  { icon: Video, label: 'Sources', path: '/sources' },
+  { icon: Lightbulb, label: 'Insights', path: '/insights' },
+  { icon: Calendar, label: 'Calendar', path: '/calendar' },
+  { icon: Settings, label: 'Settings', path: '/settings' },
+];
+
+export function Sidebar() {
+  const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+
+  return (
+    <aside 
+      className={cn(
+        "h-screen bg-sidebar flex flex-col transition-all duration-300 ease-in-out",
+        collapsed ? "w-20" : "w-64"
+      )}
+    >
+      {/* Logo */}
+      <div className="p-6 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center flex-shrink-0">
+          <BookOpen className="w-5 h-5 text-sidebar-foreground" />
+        </div>
+        {!collapsed && (
+          <div className="overflow-hidden">
+            <h1 className="font-display text-lg font-semibold text-sidebar-foreground">
+              Teachings Hub
+            </h1>
+            <p className="text-xs text-sidebar-foreground/60">Myles Munroe</p>
+          </div>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-1">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path || 
+            (item.path !== '/' && location.pathname.startsWith(item.path));
+          
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "nav-link",
+                isActive && "nav-link-active"
+              )}
+            >
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              {!collapsed && <span className="truncate">{item.label}</span>}
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      {/* Collapse button */}
+      <div className="p-3 border-t border-sidebar-border">
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+        >
+          {collapsed ? (
+            <ChevronRight className="w-5 h-5" />
+          ) : (
+            <>
+              <ChevronLeft className="w-5 h-5" />
+              <span className="text-sm">Collapse</span>
+            </>
+          )}
+        </button>
+      </div>
+    </aside>
+  );
+}
