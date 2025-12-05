@@ -17,7 +17,7 @@ export default function Landing() {
             </div>
             <span className="font-display text-xl font-bold text-cream">Teachings Hub</span>
           </div>
-          <Link to="/onboarding">
+          <Link to="/auth">
             <Button variant="gold" size="lg" className="gap-2">
               Rejoindre <ArrowRight className="w-4 h-4" />
             </Button>
@@ -34,12 +34,12 @@ export default function Landing() {
             et partagez la sagesse avec le monde.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/onboarding">
+            <Link to="/auth">
               <Button variant="gold" size="lg" className="gap-2 text-lg px-8 py-6">
                 Commencer gratuitement <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
-            <Link to="/teachings">
+            <Link to="/auth">
               <Button variant="outline" size="lg" className="gap-2 text-lg px-8 py-6 border-cream/30 text-cream hover:bg-cream/10">
                 Explorer les enseignements
               </Button>
@@ -92,7 +92,7 @@ export default function Landing() {
           <p className="text-cream/80 max-w-xl mx-auto mb-10">
             Rejoignez des centaines de créateurs qui transforment les enseignements en contenu impactant.
           </p>
-          <Link to="/onboarding">
+          <Link to="/auth">
             <Button variant="gold" size="lg" className="gap-2 text-lg px-10 py-6">
               Rejoindre maintenant <ArrowRight className="w-5 h-5" />
             </Button>

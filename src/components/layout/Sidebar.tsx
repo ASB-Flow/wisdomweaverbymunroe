@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Video, 
@@ -7,23 +7,32 @@ import {
   Settings,
   BookOpen,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Video, label: 'Sources', path: '/sources' },
   { icon: Lightbulb, label: 'Insights', path: '/insights' },
   { icon: BookOpen, label: 'Enseignements', path: '/teachings' },
-  { icon: Calendar, label: 'Calendar', path: '/calendar' },
-  { icon: Settings, label: 'Settings', path: '/settings' },
+  { icon: Calendar, label: 'Calendrier', path: '/calendar' },
+  { icon: Settings, label: 'Paramètres', path: '/settings' },
 ];
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut, user, isAdmin } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <aside 
@@ -69,8 +78,23 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Collapse button */}
-      <div className="p-3 border-t border-sidebar-border">
+      {/* User info & Logout */}
+      <div className="p-3 border-t border-sidebar-border space-y-2">
+        {!collapsed && user && (
+          <div className="px-3 py-2">
+            <p className="text-sm text-sidebar-foreground truncate">{user.email}</p>
+            {isAdmin && (
+              <span className="text-xs text-gold">Admin</span>
+            )}
+          </div>
+        )}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sidebar-foreground/60 hover:text-red-400 hover:bg-sidebar-accent transition-colors"
+        >
+          <LogOut className="w-5 h-5" />
+          {!collapsed && <span className="text-sm">Déconnexion</span>}
+        </button>
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
@@ -80,7 +104,7 @@ export function Sidebar() {
           ) : (
             <>
               <ChevronLeft className="w-5 h-5" />
-              <span className="text-sm">Collapse</span>
+              <span className="text-sm">Réduire</span>
             </>
           )}
         </button>

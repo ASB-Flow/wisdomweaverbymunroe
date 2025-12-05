@@ -3,8 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/hooks/useAuth";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Landing from "./pages/Landing";
-import Onboarding from "./pages/Onboarding";
+import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import Sources from "./pages/Sources";
 import SourceDetail from "./pages/SourceDetail";
@@ -20,26 +22,64 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/dashboard" element={<Index />} />
-          <Route path="/sources" element={<Sources />} />
-          <Route path="/sources/:id" element={<SourceDetail />} />
-          <Route path="/insights" element={<Insights />} />
-          <Route path="/insights/:id" element={<InsightDetail />} />
-          <Route path="/teachings" element={<Teachings />} />
-          <Route path="/teachings/:id" element={<TeachingDetail />} />
-          <Route path="/calendar" element={<ContentCalendar />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Index />
+              </ProtectedRoute>
+            } />
+            <Route path="/sources" element={
+              <ProtectedRoute>
+                <Sources />
+              </ProtectedRoute>
+            } />
+            <Route path="/sources/:id" element={
+              <ProtectedRoute>
+                <SourceDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/insights" element={
+              <ProtectedRoute>
+                <Insights />
+              </ProtectedRoute>
+            } />
+            <Route path="/insights/:id" element={
+              <ProtectedRoute>
+                <InsightDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/teachings" element={
+              <ProtectedRoute>
+                <Teachings />
+              </ProtectedRoute>
+            } />
+            <Route path="/teachings/:id" element={
+              <ProtectedRoute>
+                <TeachingDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/calendar" element={
+              <ProtectedRoute>
+                <ContentCalendar />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

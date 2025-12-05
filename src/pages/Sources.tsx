@@ -1,41 +1,151 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Header } from '@/components/layout/Header';
 import { SourceCard } from '@/components/sources/SourceCard';
-import { sources } from '@/lib/seed-data';
-import { useState } from 'react';
+import { sources as seedSources } from '@/lib/seed-data';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Link2, Youtube, FileAudio, FileText, Loader2 } from 'lucide-react';
+import { Link2, Youtube, FileAudio, FileText, Loader2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Source {
+  id: string;
+  title: string;
+  url: string;
+  speaker: string;
+  duration_seconds: number | null;
+  thumbnail_url: string | null;
+  platform: string;
+  youtube_id: string | null;
+  published_at: string | null;
+}
 
 export default function Sources() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [sources, setSources] = useState<Source[]>([]);
+  const [previewData, setPreviewData] = useState<any>(null);
   const { toast } = useToast();
+  const { isAdmin, session } = useAuth();
 
-  const handleImport = async () => {
+  // Fetch sources from database
+  useEffect(() => {
+    fetchSources();
+  }, []);
+
+  const fetchSources = async () => {
+    const { data, error } = await supabase
+      .from('sources')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (data && !error) {
+      setSources(data);
+    }
+  };
+
+  const handleFetchMetadata = async () => {
     if (!url.trim()) {
       toast({
-        title: "URL required",
-        description: "Please enter a valid YouTube URL",
+        title: "URL requise",
+        description: "Veuillez entrer une URL YouTube valide",
         variant: "destructive"
       });
       return;
     }
 
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    setShowAddModal(false);
-    setUrl('');
-    
-    toast({
-      title: "Source imported!",
-      description: "Your video is being processed. Transcription will begin shortly.",
-    });
+    setIsFetching(true);
+    setPreviewData(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('youtube-metadata', {
+        body: { url, saveToDb: false }
+      });
+
+      if (error) throw error;
+      
+      if (data.error) {
+        toast({
+          title: "Erreur",
+          description: data.error,
+          variant: "destructive"
+        });
+      } else {
+        setPreviewData(data.metadata);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de récupérer les métadonnées",
+        variant: "destructive"
+      });
+    }
+
+    setIsFetching(false);
   };
+
+  const handleImport = async () => {
+    if (!previewData) {
+      await handleFetchMetadata();
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('youtube-metadata', {
+        body: { url, saveToDb: true }
+      });
+
+      if (error) throw error;
+      
+      if (data.error) {
+        toast({
+          title: "Erreur",
+          description: data.error === 'This video has already been imported' 
+            ? 'Cette vidéo a déjà été importée'
+            : data.error,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Source importée !",
+          description: "La vidéo a été ajoutée. La transcription commencera bientôt.",
+        });
+        setShowAddModal(false);
+        setUrl('');
+        setPreviewData(null);
+        fetchSources();
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible d'importer la source",
+        variant: "destructive"
+      });
+    }
+
+    setIsLoading(false);
+  };
+
+  // Combine DB sources with seed data for display
+  const allSources: import('@/lib/seed-data').Source[] = [
+    ...sources.map(s => ({
+      id: s.id,
+      title: s.title,
+      url: s.url,
+      speaker: s.speaker,
+      publishedAt: s.published_at ? new Date(s.published_at) : new Date(),
+      durationSeconds: s.duration_seconds || 0,
+      thumbnailUrl: s.thumbnail_url || `https://img.youtube.com/vi/${s.youtube_id}/maxresdefault.jpg`,
+      platform: s.platform as 'youtube' | 'audio' | 'doc',
+    })),
+    ...seedSources
+  ];
 
   return (
     <MainLayout>
@@ -66,7 +176,7 @@ export default function Sources() {
 
         {/* Sources Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-          {sources.map((source, index) => (
+          {allSources.map((source, index) => (
             <div 
               key={source.id} 
               className="animate-slide-up"
@@ -79,12 +189,18 @@ export default function Sources() {
       </div>
 
       {/* Import Modal */}
-      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+      <Dialog open={showAddModal} onOpenChange={(open) => {
+        setShowAddModal(open);
+        if (!open) {
+          setUrl('');
+          setPreviewData(null);
+        }
+      }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl">Import New Source</DialogTitle>
+            <DialogTitle className="font-display text-xl">Importer une source</DialogTitle>
             <DialogDescription>
-              Paste a YouTube URL to import a video. The system will automatically transcribe and extract insights.
+              Collez une URL YouTube pour importer une vidéo. Le système extraira automatiquement les métadonnées.
             </DialogDescription>
           </DialogHeader>
           
@@ -95,36 +211,90 @@ export default function Sources() {
                 type="url"
                 placeholder="https://youtube.com/watch?v=..."
                 value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                onChange={(e) => {
+                  setUrl(e.target.value);
+                  setPreviewData(null);
+                }}
                 className="input-field pl-11"
               />
             </div>
+
+            {!previewData && (
+              <Button 
+                variant="outline" 
+                onClick={handleFetchMetadata} 
+                disabled={isFetching || !url.trim()}
+                className="w-full gap-2"
+              >
+                {isFetching ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Récupération...
+                  </>
+                ) : (
+                  'Prévisualiser les métadonnées'
+                )}
+              </Button>
+            )}
+
+            {previewData && (
+              <div className="bg-secondary/50 rounded-lg p-4 space-y-3">
+                <div className="flex gap-3">
+                  <img 
+                    src={previewData.thumbnail_url} 
+                    alt={previewData.title}
+                    className="w-24 h-16 object-cover rounded"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-sm line-clamp-2">{previewData.title}</h4>
+                    <p className="text-xs text-muted-foreground mt-1">{previewData.speaker}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle className="w-4 h-4" />
+                  <span className="text-sm">Métadonnées récupérées avec succès</span>
+                </div>
+              </div>
+            )}
             
-            <div className="bg-secondary/50 rounded-lg p-4">
-              <h4 className="font-medium text-sm mb-2">What happens next:</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>1. Video metadata extracted</li>
-                <li>2. Audio transcribed (via Whisper)</li>
-                <li>3. Insights automatically identified</li>
-                <li>4. Post templates generated</li>
-              </ul>
-            </div>
+            {!previewData && (
+              <div className="bg-secondary/50 rounded-lg p-4">
+                <h4 className="font-medium text-sm mb-2">Prochaines étapes:</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>1. Métadonnées de la vidéo extraites</li>
+                  <li>2. Audio transcrit (via Whisper)</li>
+                  <li>3. Insights automatiquement identifiés</li>
+                  <li>4. Templates de posts générés</li>
+                </ul>
+              </div>
+            )}
 
             <div className="flex justify-end gap-3 pt-2">
               <Button variant="outline" onClick={() => setShowAddModal(false)}>
-                Cancel
+                Annuler
               </Button>
-              <Button variant="gold" onClick={handleImport} disabled={isLoading}>
+              <Button 
+                variant="gold" 
+                onClick={handleImport} 
+                disabled={isLoading || (!previewData && !url.trim()) || !isAdmin}
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing...
+                    Importation...
                   </>
+                ) : previewData ? (
+                  'Importer cette vidéo'
                 ) : (
-                  'Import & Process'
+                  'Importer'
                 )}
               </Button>
             </div>
+            {!isAdmin && (
+              <p className="text-xs text-destructive text-center">
+                Seuls les administrateurs peuvent importer des sources.
+              </p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
