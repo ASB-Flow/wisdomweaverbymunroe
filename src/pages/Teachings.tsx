@@ -8,7 +8,7 @@ import {
   Plus, Search, BookOpen, Video, Edit, Eye, 
   Sparkles, Globe, CheckCircle, Youtube, Image, Loader2, Download
 } from 'lucide-react';
-import { insights, getSourceById } from '@/lib/seed-data';
+import { getSourceById } from '@/lib/seed-data';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -28,57 +28,15 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-
-const themes = [
-  { id: 'meditation', label: 'Méditation', tags: ['méditation', 'parole', 'transformation'] },
-  { id: 'leadership', label: 'Leadership', tags: ['leadership', 'service', 'influence', 'caractère', 'intégrité'] },
-  { id: 'purpose', label: 'Purpose & Destinée', tags: ['purpose', 'destinée', 'potentiel', 'création'] },
-  { id: 'kingdom', label: 'Royaume', tags: ['royaume', 'gouvernement', 'spiritualité'] },
-  { id: 'vision', label: 'Vision', tags: ['vision', 'provision'] },
-];
-
-interface Teaching {
-  id: string;
-  titleFr: string;
-  theme: string;
-  insights: typeof insights;
-  status: 'draft' | 'review' | 'published';
-  contentFr: string;
-  youtubeUrl?: string;
-  socialPosts?: {
-    twitter?: string;
-    instagram?: string;
-    youtube?: string;
-  };
-  generatedDesign?: string;
-}
-
-const generateTeachings = (): Teaching[] => {
-  return themes.map((theme, idx) => {
-    const themeInsights = insights.filter(insight => 
-      insight.tags.some(tag => theme.tags.includes(tag))
-    );
-    const combinedContent = themeInsights.map(i => 
-      `## ${i.title}\n\n${i.bullets.map(b => `- ${b}`).join('\n')}\n\n> "${i.citationText}"`
-    ).join('\n\n---\n\n');
-
-    return {
-      id: `teaching-${idx + 1}`,
-      titleFr: `Enseignement sur ${theme.label}`,
-      theme: theme.id,
-      insights: themeInsights,
-      status: idx === 0 ? 'published' : idx === 1 ? 'review' : 'draft',
-      contentFr: combinedContent,
-    };
-  });
-};
+import { useTeachingsStore, themes, Teaching } from '@/lib/teachings-store';
 
 export default function Teachings() {
   const { toast } = useToast();
   const { isAdmin } = useAuth();
+  const { teachings, addTeaching, updateTeaching } = useTeachingsStore();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
-  const [teachings, setTeachings] = useState<Teaching[]>(generateTeachings);
   const [editingTeaching, setEditingTeaching] = useState<Teaching | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
@@ -106,13 +64,17 @@ export default function Teachings() {
     setEditingTeaching(teaching);
     setEditTitle(teaching.titleFr);
     setEditContent(teaching.contentFr);
+    setGeneratedDesignUrl(teaching.generatedDesign || null);
   };
 
   const handleSave = (publish: boolean = false) => {
     if (!editingTeaching) return;
-    setTeachings(prev => prev.map(t => 
-      t.id === editingTeaching.id ? { ...t, titleFr: editTitle, contentFr: editContent, status: publish ? 'published' : 'review' } : t
-    ));
+    updateTeaching(editingTeaching.id, { 
+      titleFr: editTitle, 
+      contentFr: editContent, 
+      status: publish ? 'published' : 'review',
+      generatedDesign: generatedDesignUrl || undefined
+    });
     setEditingTeaching(null);
     toast({ title: publish ? "Enseignement publié !" : "Modifications enregistrées" });
   };
@@ -122,10 +84,15 @@ export default function Teachings() {
     setIsCreating(true);
     await new Promise(resolve => setTimeout(resolve, 1500));
     const theme = themes.find(t => t.id === selectedCreateTheme)!;
-    const themeInsights = insights.filter(insight => insight.tags.some(tag => theme.tags.includes(tag)));
-    const combinedContent = themeInsights.map(i => `## ${i.title}\n\n${i.bullets.map(b => `- ${b}`).join('\n')}\n\n> "${i.citationText}"`).join('\n\n---\n\n');
-    const newTeaching: Teaching = { id: `teaching-${teachings.length + 1}`, titleFr: `Enseignement sur ${theme.label}`, theme: theme.id, insights: themeInsights, status: 'draft', contentFr: combinedContent };
-    setTeachings(prev => [...prev, newTeaching]);
+    const newTeaching: Teaching = { 
+      id: `teaching-${teachings.length + 1}`, 
+      titleFr: `Enseignement sur ${theme.label}`, 
+      theme: theme.id, 
+      insights: [], 
+      status: 'draft', 
+      contentFr: '' 
+    };
+    addTeaching(newTeaching);
     setIsCreating(false);
     setShowCreateDialog(false);
     setSelectedCreateTheme(null);
@@ -185,7 +152,7 @@ export default function Teachings() {
       socialPosts: teaching.socialPosts,
     };
 
-    setTeachings(prev => [...prev, newTeaching]);
+    addTeaching(newTeaching);
     setShowCreateDialog(false);
     setYoutubeUrl('');
     setGeneratedContent(null);
@@ -432,16 +399,16 @@ Square format (1:1) for Instagram.`
 
                     {generatedContent.teaching.socialPosts && (
                       <div>
-                        <Label className="text-xs text-muted-foreground">Posts sociaux générés</Label>
-                        <div className="grid gap-2 mt-1">
+                        <Label className="text-xs text-muted-foreground">Posts réseaux sociaux</Label>
+                        <div className="space-y-2 mt-1">
                           {generatedContent.teaching.socialPosts.twitter && (
-                            <div className="text-xs bg-background p-2 rounded border">
-                              <span className="text-blue-500 font-medium">Twitter:</span> {generatedContent.teaching.socialPosts.twitter}
+                            <div className="p-2 bg-background rounded text-xs">
+                              <span className="font-medium">Twitter/X:</span> {generatedContent.teaching.socialPosts.twitter}
                             </div>
                           )}
                           {generatedContent.teaching.socialPosts.instagram && (
-                            <div className="text-xs bg-background p-2 rounded border">
-                              <span className="text-pink-500 font-medium">Instagram:</span> {generatedContent.teaching.socialPosts.instagram}
+                            <div className="p-2 bg-background rounded text-xs">
+                              <span className="font-medium">Instagram:</span> {generatedContent.teaching.socialPosts.instagram}
                             </div>
                           )}
                         </div>
@@ -450,181 +417,140 @@ Square format (1:1) for Instagram.`
 
                     <Button variant="gold" className="w-full gap-2" onClick={handleSaveGeneratedContent}>
                       <CheckCircle className="w-4 h-4" />
-                      Enregistrer l'enseignement
+                      Enregistrer cet enseignement
                     </Button>
                   </div>
                 )}
               </TabsContent>
 
               <TabsContent value="theme" className="space-y-4 mt-4">
-                <Label>Sélectionnez un thème</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   {themes.map(theme => (
                     <Button 
                       key={theme.id} 
                       variant={selectedCreateTheme === theme.id ? "default" : "outline"} 
-                      className="justify-start" 
+                      className="h-auto py-4 flex-col items-start" 
                       onClick={() => setSelectedCreateTheme(theme.id)}
                     >
-                      {theme.label}
+                      <span className="font-medium">{theme.label}</span>
+                      <span className="text-xs text-muted-foreground font-normal">{theme.tags.join(', ')}</span>
                     </Button>
                   ))}
                 </div>
-                <Button 
-                  variant="gold" 
-                  className="w-full gap-2" 
-                  onClick={handleCreateTeaching} 
-                  disabled={isCreating || !selectedCreateTheme}
-                >
-                  {isCreating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Génération...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      Générer
-                    </>
-                  )}
+                <Button variant="gold" className="w-full gap-2" onClick={handleCreateTeaching} disabled={!selectedCreateTheme || isCreating}>
+                  {isCreating ? <><Loader2 className="w-4 h-4 animate-spin" />Création...</> : <><Sparkles className="w-4 h-4" />Créer l'enseignement</>}
                 </Button>
               </TabsContent>
             </Tabs>
           </DialogContent>
         </Dialog>
 
-        {/* Edit Dialog with Design Generation */}
-        <Dialog open={!!editingTeaching} onOpenChange={() => { setEditingTeaching(null); setGeneratedDesignUrl(null); setDesignPrompt(''); }}>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        {/* Edit Dialog */}
+        <Dialog open={!!editingTeaching} onOpenChange={(open) => !open && setEditingTeaching(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Edit className="w-5 h-5" />Modifier l'enseignement
-              </DialogTitle>
+              <DialogTitle>Modifier l'enseignement</DialogTitle>
+              <DialogDescription>Vérifiez et modifiez le contenu avant publication</DialogDescription>
             </DialogHeader>
-            {editingTeaching && (
-              <Tabs defaultValue="content" className="mt-4">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="content" className="gap-2">
-                    <Globe className="w-4 h-4" /> Contenu
-                  </TabsTrigger>
-                  <TabsTrigger value="design" className="gap-2">
-                    <Image className="w-4 h-4" /> Designs IA
-                  </TabsTrigger>
-                </TabsList>
+            
+            <Tabs defaultValue="content" className="mt-4">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="content" className="gap-2">
+                  <Globe className="w-4 h-4" /> Contenu
+                </TabsTrigger>
+                <TabsTrigger value="design" className="gap-2">
+                  <Image className="w-4 h-4" /> Designs IA
+                </TabsTrigger>
+              </TabsList>
 
-                <TabsContent value="content" className="space-y-6 mt-4">
+              <TabsContent value="content" className="space-y-4 mt-4">
+                <div>
+                  <Label>Titre</Label>
+                  <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="mt-1" />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label>Titre</Label>
-                    <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="mt-1" />
+                    <Label>Contenu (FR)</Label>
+                    <Textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className="mt-1 min-h-[300px] font-mono text-sm" />
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="flex items-center gap-2">
-                        <Globe className="w-4 h-4" />Contenu (FR)
-                      </Label>
-                      <Textarea 
-                        value={editContent} 
-                        onChange={(e) => setEditContent(e.target.value)} 
-                        className="mt-1 min-h-[300px] font-mono text-sm" 
-                      />
-                    </div>
-                    <div>
-                      <Label>Aperçu</Label>
-                      <div className="mt-1 p-4 bg-muted/50 rounded-lg min-h-[300px] prose prose-sm max-w-none overflow-y-auto">
-                        {editContent.split('\n').map((line, idx) => (
-                          <p 
-                            key={idx} 
-                            className={cn(
-                              line.startsWith('##') && "font-display font-bold text-lg",
-                              line.startsWith('-') && "ml-4",
-                              line.startsWith('>') && "border-l-2 border-accent pl-3 italic text-muted-foreground"
-                            )}
-                          >
-                            {line.replace(/^##\s/, '').replace(/^>\s/, '').replace(/^-\s/, '• ')}
-                          </p>
-                        ))}
-                      </div>
+                  <div>
+                    <Label>Aperçu</Label>
+                    <div className="mt-1 p-4 bg-muted/50 rounded-lg min-h-[300px] prose prose-sm max-w-none overflow-y-auto">
+                      {editContent.split('\n').map((line, idx) => (
+                        <p key={idx} className={cn(
+                          line.startsWith('##') && "font-display font-bold text-lg",
+                          line.startsWith('-') && "ml-4",
+                          line.startsWith('>') && "border-l-2 border-accent pl-3 italic text-muted-foreground"
+                        )}>
+                          {line.replace(/^##\s/, '').replace(/^>\s/, '').replace(/^-\s/, '• ')}
+                        </p>
+                      ))}
                     </div>
                   </div>
-                  <div className="flex justify-end gap-3">
-                    <Button variant="outline" onClick={() => setEditingTeaching(null)}>Annuler</Button>
-                    <Button variant="outline" onClick={() => handleSave(false)} className="gap-2">
-                      <CheckCircle className="w-4 h-4" />Enregistrer
-                    </Button>
-                    <Button variant="gold" onClick={() => handleSave(true)} className="gap-2">
-                      <CheckCircle className="w-4 h-4" />Publier
-                    </Button>
-                  </div>
-                </TabsContent>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setEditingTeaching(null)}>Annuler</Button>
+                  <Button variant="outline" onClick={() => handleSave(false)}>Enregistrer</Button>
+                  <Button variant="gold" onClick={() => handleSave(true)}>Publier</Button>
+                </div>
+              </TabsContent>
 
-                <TabsContent value="design" className="space-y-6 mt-4">
-                  <div className="bg-muted/30 rounded-lg p-4 border border-border">
-                    <h3 className="font-display font-semibold mb-2 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-gold" />
-                      Générateur de designs explicatifs
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Créez des visuels professionnels pour vos réseaux sociaux à partir du contenu de l'enseignement.
-                    </p>
+              <TabsContent value="design" className="space-y-4 mt-4">
+                <div>
+                  <Label>Prompt de design (optionnel)</Label>
+                  <Textarea 
+                    value={designPrompt} 
+                    onChange={(e) => setDesignPrompt(e.target.value)} 
+                    placeholder="Décrivez le style de design souhaité..."
+                    className="mt-1"
+                  />
+                </div>
 
-                    <div className="space-y-4">
-                      <div>
-                        <Label>Instructions personnalisées (optionnel)</Label>
-                        <Textarea 
-                          placeholder="Ex: Créer une carte citation minimaliste avec fond dégradé bleu/violet..."
-                          value={designPrompt}
-                          onChange={(e) => setDesignPrompt(e.target.value)}
-                          className="mt-1"
-                        />
-                      </div>
+                <Button 
+                  variant="gold" 
+                  className="w-full gap-2" 
+                  onClick={handleGenerateDesign}
+                  disabled={isGeneratingDesign}
+                >
+                  {isGeneratingDesign ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Génération du design...
+                    </>
+                  ) : (
+                    <>
+                      <Image className="w-4 h-4" />
+                      Générer un design
+                    </>
+                  )}
+                </Button>
 
-                      <Button 
-                        variant="gold" 
-                        className="w-full gap-2" 
-                        onClick={handleGenerateDesign}
-                        disabled={isGeneratingDesign}
-                      >
-                        {isGeneratingDesign ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Génération du design...
-                          </>
-                        ) : (
-                          <>
-                            <Image className="w-4 h-4" />
-                            Générer un design
-                          </>
-                        )}
+                {generatedDesignUrl && (
+                  <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-4">
+                    <div className="flex items-center gap-2 text-green-600">
+                      <CheckCircle className="w-5 h-5" />
+                      <span className="font-medium">Design généré !</span>
+                    </div>
+                    <img 
+                      src={generatedDesignUrl} 
+                      alt="Generated design" 
+                      className="w-full rounded-lg"
+                    />
+                    <a 
+                      href={generatedDesignUrl} 
+                      download="teaching-design.png"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button variant="outline" className="w-full gap-2">
+                        <Download className="w-4 h-4" />
+                        Télécharger
                       </Button>
-
-                      {generatedDesignUrl && (
-                        <div className="border border-border rounded-lg p-4 bg-background">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm font-medium text-green-600 flex items-center gap-2">
-                              <CheckCircle className="w-4 h-4" />
-                              Design généré !
-                            </span>
-                            <a 
-                              href={generatedDesignUrl} 
-                              download="teaching-design.png"
-                              className="text-sm text-accent hover:underline flex items-center gap-1"
-                            >
-                              <Download className="w-4 h-4" />
-                              Télécharger
-                            </a>
-                          </div>
-                          <img 
-                            src={generatedDesignUrl} 
-                            alt="Generated design" 
-                            className="w-full max-w-md mx-auto rounded-lg shadow-lg"
-                          />
-                        </div>
-                      )}
-                    </div>
+                    </a>
                   </div>
-                </TabsContent>
-              </Tabs>
-            )}
+                )}
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         </Dialog>
       </div>
