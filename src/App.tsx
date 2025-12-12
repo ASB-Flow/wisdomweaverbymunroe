@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
+import UserHome from "./pages/UserHome";
 import Sources from "./pages/Sources";
 import SourceDetail from "./pages/SourceDetail";
 import Insights from "./pages/Insights";
@@ -30,6 +31,12 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            {/* Page d'accueil personnalisée pour utilisateurs authentifiés */}
+            <Route path="/home" element={
+              <ProtectedRoute>
+                <UserHome />
+              </ProtectedRoute>
+            } />
             {/* Pages accessibles à tous les utilisateurs authentifiés */}
             <Route path="/teachings" element={
               <ProtectedRoute>
