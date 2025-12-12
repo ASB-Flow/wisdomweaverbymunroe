@@ -14,11 +14,16 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
-const navItems = [
+// Navigation pour tous les utilisateurs
+const userNavItems = [
+  { icon: BookOpen, label: 'Enseignements', path: '/teachings' },
+  { icon: Lightbulb, label: 'Insights', path: '/insights' },
+];
+
+// Navigation réservée aux admins
+const adminNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Video, label: 'Sources', path: '/sources' },
-  { icon: Lightbulb, label: 'Insights', path: '/insights' },
-  { icon: BookOpen, label: 'Enseignements', path: '/teachings' },
   { icon: Calendar, label: 'Calendrier', path: '/calendar' },
   { icon: Settings, label: 'Paramètres', path: '/settings' },
 ];
@@ -58,10 +63,31 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map((item) => {
-        const isActive = location.pathname === item.path || 
-            (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
-          
+        {/* Items pour tous les utilisateurs */}
+        {userNavItems.map((item) => {
+          const isActive = location.pathname === item.path || 
+              (item.path !== '/teachings' && location.pathname.startsWith(item.path));
+            
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "nav-link",
+                isActive && "nav-link-active"
+              )}
+            >
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              {!collapsed && <span className="truncate">{item.label}</span>}
+            </NavLink>
+          );
+        })}
+        
+        {/* Items réservés aux admins */}
+        {isAdmin && adminNavItems.map((item) => {
+          const isActive = location.pathname === item.path || 
+              (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
+            
           return (
             <NavLink
               key={item.path}
