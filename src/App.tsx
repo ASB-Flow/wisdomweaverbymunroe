@@ -30,19 +30,15 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={
+            {/* Pages accessibles à tous les utilisateurs authentifiés */}
+            <Route path="/teachings" element={
               <ProtectedRoute>
-                <Index />
+                <Teachings />
               </ProtectedRoute>
             } />
-            <Route path="/sources" element={
+            <Route path="/teachings/:id" element={
               <ProtectedRoute>
-                <Sources />
-              </ProtectedRoute>
-            } />
-            <Route path="/sources/:id" element={
-              <ProtectedRoute>
-                <SourceDetail />
+                <TeachingDetail />
               </ProtectedRoute>
             } />
             <Route path="/insights" element={
@@ -55,23 +51,30 @@ const App = () => (
                 <InsightDetail />
               </ProtectedRoute>
             } />
-            <Route path="/teachings" element={
-              <ProtectedRoute>
-                <Teachings />
+            
+            {/* Pages réservées aux administrateurs */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute requireAdmin>
+                <Index />
               </ProtectedRoute>
             } />
-            <Route path="/teachings/:id" element={
-              <ProtectedRoute>
-                <TeachingDetail />
+            <Route path="/sources" element={
+              <ProtectedRoute requireAdmin>
+                <Sources />
+              </ProtectedRoute>
+            } />
+            <Route path="/sources/:id" element={
+              <ProtectedRoute requireAdmin>
+                <SourceDetail />
               </ProtectedRoute>
             } />
             <Route path="/calendar" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin>
                 <ContentCalendar />
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin>
                 <Settings />
               </ProtectedRoute>
             } />
