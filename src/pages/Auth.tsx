@@ -32,7 +32,7 @@ export default function Auth() {
   // Redirect if already authenticated
   useEffect(() => {
     if (user && !authLoading) {
-      navigate('/dashboard');
+      navigate('/home');
     }
   }, [user, authLoading, navigate]);
 
@@ -74,7 +74,7 @@ export default function Auth() {
           title: "Connexion réussie",
           description: "Bienvenue !",
         });
-        navigate('/dashboard');
+        navigate('/home');
       }
     } else {
       const { error } = await signUp(formData.email, formData.password, formData.displayName);
@@ -92,7 +92,7 @@ export default function Auth() {
           title: "Inscription réussie",
           description: "Votre compte a été créé. Vous êtes maintenant connecté.",
         });
-        navigate('/dashboard');
+        navigate('/home');
       }
     }
 

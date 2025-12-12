@@ -8,7 +8,8 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
-  LogOut
+  LogOut,
+  Home
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -16,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 // Navigation pour tous les utilisateurs
 const userNavItems = [
+  { icon: Home, label: 'Accueil', path: '/home' },
   { icon: BookOpen, label: 'Enseignements', path: '/teachings' },
   { icon: Lightbulb, label: 'Insights', path: '/insights' },
 ];
@@ -65,8 +67,7 @@ export function Sidebar() {
       <nav className="flex-1 px-3 py-4 space-y-1">
         {/* Items pour tous les utilisateurs */}
         {userNavItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-              (item.path !== '/teachings' && location.pathname.startsWith(item.path));
+          const isActive = location.pathname === item.path;
             
           return (
             <NavLink

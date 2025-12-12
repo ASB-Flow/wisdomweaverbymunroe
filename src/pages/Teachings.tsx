@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Plus, Search, BookOpen, Video, Edit, Eye, 
-  Sparkles, Globe, CheckCircle, Youtube, Image, Loader2, Download
+  Sparkles, Globe, CheckCircle, Youtube, Image, Loader2, Download, Heart
 } from 'lucide-react';
+import { useFavorites } from '@/hooks/useFavorites';
 import { getSourceById } from '@/lib/seed-data';
 import { cn } from '@/lib/utils';
 import {
@@ -34,6 +35,7 @@ export default function Teachings() {
   const { toast } = useToast();
   const { isAdmin } = useAuth();
   const { teachings, addTeaching, updateTeaching } = useTeachingsStore();
+  const { toggleFavorite, isFavorite } = useFavorites();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
@@ -285,6 +287,21 @@ Square format (1:1) for Instagram.`
                 <div className="flex flex-col items-end gap-3">
                   {getStatusBadge(teaching.status)}
                   <div className="flex gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => toggleFavorite(teaching.id)}
+                      className="h-8 w-8"
+                    >
+                      <Heart 
+                        className={cn(
+                          "w-4 h-4 transition-colors",
+                          isFavorite(teaching.id) 
+                            ? "fill-destructive text-destructive" 
+                            : "text-muted-foreground hover:text-foreground"
+                        )} 
+                      />
+                    </Button>
                     {isAdmin && (
                       <Button variant="outline" size="sm" className="gap-1" onClick={() => handleEdit(teaching)}>
                         <Edit className="w-3 h-3" />Modifier

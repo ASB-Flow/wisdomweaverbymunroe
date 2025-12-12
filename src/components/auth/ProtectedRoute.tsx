@@ -24,8 +24,8 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
   }
 
   if (requireAdmin && !isAdmin) {
-    // Rediriger les non-admins vers la page enseignements
-    return <Navigate to="/teachings" replace />;
+    // Rediriger les non-admins vers la page d'accueil utilisateur
+    return <Navigate to="/home" replace />;
   }
 
   return <>{children}</>;
