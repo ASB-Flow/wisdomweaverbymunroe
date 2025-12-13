@@ -10,6 +10,7 @@ import {
   ArrowLeft, BookOpen, Video, Clock, Edit, Share2, 
   Download, CheckCircle, Sparkles, ExternalLink, Copy, Globe, Youtube, Image, Loader2
 } from 'lucide-react';
+import { CommentSection } from '@/components/comments/CommentSection';
 import { getSourceById, formatTimestamp } from '@/lib/seed-data';
 import {
   Dialog,
@@ -407,6 +408,9 @@ Square format (1:1) for Instagram.`
                 </a>
               </div>
             )}
+
+            {/* Comments Section */}
+            <CommentSection teachingId={teaching.id} />
           </div>
 
           {/* Sidebar */}
