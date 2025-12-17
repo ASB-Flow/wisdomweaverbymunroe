@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 interface InsightCardProps {
   insight: Insight;
   className?: string;
+  showConfidence?: boolean;
 }
 
-export function InsightCard({ insight, className }: InsightCardProps) {
+export function InsightCard({ insight, className, showConfidence = true }: InsightCardProps) {
   const source = getSourceById(insight.sourceId);
   const clip = getClipByInsightId(insight.id);
   
@@ -22,10 +23,12 @@ export function InsightCard({ insight, className }: InsightCardProps) {
         <h3 className="font-display text-lg font-semibold text-foreground group-hover:text-accent transition-colors line-clamp-2">
           {insight.title}
         </h3>
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium flex-shrink-0">
-          <Sparkles className="w-3 h-3" />
-          {Math.round(insight.confidence * 100)}%
-        </div>
+        {showConfidence && (
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium flex-shrink-0">
+            <Sparkles className="w-3 h-3" />
+            {Math.round(insight.confidence * 100)}%
+          </div>
+        )}
       </div>
 
       {/* Citation */}
@@ -43,7 +46,7 @@ export function InsightCard({ insight, className }: InsightCardProps) {
         ))}
         {insight.bullets.length > 2 && (
           <li className="text-xs text-muted-foreground pl-3.5">
-            +{insight.bullets.length - 2} more points
+            +{insight.bullets.length - 2} points supplémentaires
           </li>
         )}
       </ul>

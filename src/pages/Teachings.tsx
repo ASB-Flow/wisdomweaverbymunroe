@@ -267,22 +267,24 @@ Square format (1:1) for Instagram.`
                     <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center"><BookOpen className="w-5 h-5 text-accent" /></div>
                     <div>
                       <h3 className="font-display text-lg font-semibold text-foreground">{teaching.titleFr}</h3>
-                      <p className="text-sm text-muted-foreground">{teaching.insights.length} insights</p>
+                      {isAdmin && <p className="text-sm text-muted-foreground">{teaching.insights.length} extraits</p>}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-4 mb-3">
-                    <Video className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">Sources :</span>
-                    {[...new Set(teaching.insights.map(i => i.sourceId))].slice(0, 3).map(sourceId => {
-                      const source = getSourceById(sourceId);
-                      return source ? <Badge key={sourceId} variant="secondary" className="text-xs">{source.title.slice(0, 20)}...</Badge> : null;
-                    })}
-                    {teaching.youtubeUrl && (
-                      <Badge variant="outline" className="text-xs gap-1">
-                        <Youtube className="w-3 h-3" /> YouTube
-                      </Badge>
-                    )}
-                  </div>
+                  {isAdmin && (
+                    <div className="flex items-center gap-2 mt-4 mb-3">
+                      <Video className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Sources :</span>
+                      {[...new Set(teaching.insights.map(i => i.sourceId))].slice(0, 3).map(sourceId => {
+                        const source = getSourceById(sourceId);
+                        return source ? <Badge key={sourceId} variant="secondary" className="text-xs">{source.title.slice(0, 20)}...</Badge> : null;
+                      })}
+                      {teaching.youtubeUrl && (
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <Youtube className="w-3 h-3" /> YouTube
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col items-end gap-3">
                   {getStatusBadge(teaching.status)}
