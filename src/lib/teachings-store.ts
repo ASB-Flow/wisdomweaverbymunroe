@@ -2,6 +2,37 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { insights } from '@/lib/seed-data';
 
+export interface VisualConcept {
+  title: string;
+  type: 'diagram' | 'pyramid' | 'cycle' | 'comparison' | 'timeline' | 'mindmap';
+  description: string;
+  elements: string[];
+  explanation: string;
+}
+
+export interface PracticalTip {
+  tip: string;
+  icon: 'lightbulb' | 'target' | 'star' | 'heart' | 'book' | 'compass';
+  application: string;
+}
+
+export interface Citation {
+  text: string;
+  context?: string;
+}
+
+export interface Principle {
+  name: string;
+  definition: string;
+  importance: string;
+}
+
+export interface ApplicationStep {
+  step: number;
+  action: string;
+  outcome: string;
+}
+
 export interface Teaching {
   id: string;
   titleFr: string;
@@ -16,6 +47,12 @@ export interface Teaching {
     youtube?: string;
   };
   generatedDesign?: string;
+  // Enhanced content fields
+  visualConcepts?: VisualConcept[];
+  practicalTips?: PracticalTip[];
+  citations?: Citation[];
+  principles?: Principle[];
+  applicationSteps?: ApplicationStep[];
 }
 
 const themes = [

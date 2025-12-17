@@ -144,14 +144,20 @@ export default function Teachings() {
 
     const teaching = generatedContent.teaching;
     const newTeaching: Teaching = {
-      id: `teaching-${teachings.length + 1}`,
+      id: `teaching-${Date.now()}`,
       titleFr: teaching.title || `Enseignement - ${generatedContent.videoTitle}`,
-      theme: selectedCreateTheme || 'leadership',
+      theme: selectedCreateTheme || (teaching.themes?.[0] || 'leadership'),
       insights: [],
       status: 'draft',
       contentFr: formatGeneratedContent(teaching),
       youtubeUrl,
       socialPosts: teaching.socialPosts,
+      // Enhanced content fields
+      visualConcepts: teaching.visualConcepts,
+      practicalTips: teaching.practicalTips,
+      citations: teaching.citations,
+      principles: teaching.principles,
+      applicationSteps: teaching.applicationSteps,
     };
 
     addTeaching(newTeaching);
@@ -159,7 +165,7 @@ export default function Teachings() {
     setYoutubeUrl('');
     setGeneratedContent(null);
     setSelectedCreateTheme(null);
-    toast({ title: "Enseignement enregistré !" });
+    toast({ title: "Enseignement enregistré avec contenu enrichi !" });
   };
 
   const formatGeneratedContent = (teaching: any): string => {
@@ -173,8 +179,16 @@ export default function Teachings() {
       content += `## Points clés\n\n${teaching.keyPoints.map((p: string) => `- ${p}`).join('\n')}\n\n`;
     }
     
+    // Handle citations - support both old format (array of strings) and new format (array of objects)
     if (teaching.citations?.length) {
-      content += `## Citations\n\n${teaching.citations.map((c: string) => `> "${c}"`).join('\n\n')}\n\n`;
+      content += `## Citations\n\n`;
+      teaching.citations.forEach((c: any) => {
+        if (typeof c === 'string') {
+          content += `> "${c}"\n\n`;
+        } else if (c.text) {
+          content += `> "${c.text}"${c.context ? `\n> _${c.context}_` : ''}\n\n`;
+        }
+      });
     }
 
     if (teaching.raw) {
