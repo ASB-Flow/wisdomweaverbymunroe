@@ -1,5 +1,6 @@
 import { Search, Bell, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { MobileSidebar } from './MobileSidebar';
 
 interface HeaderProps {
   title: string;
@@ -17,12 +18,15 @@ export function Header({
   addButtonLabel = 'Add New'
 }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between py-6 px-8 border-b border-border bg-card/50 backdrop-blur-sm">
-      <div>
-        <h1 className="text-2xl font-display font-semibold text-foreground">{title}</h1>
-        {subtitle && (
-          <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
-        )}
+    <header className="flex items-center justify-between py-4 px-4 md:py-6 md:px-8 border-b border-border bg-card/50 backdrop-blur-sm">
+      <div className="flex items-center gap-3">
+        <MobileSidebar />
+        <div>
+          <h1 className="text-xl md:text-2xl font-display font-semibold text-foreground">{title}</h1>
+          {subtitle && (
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">{subtitle}</p>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-4">
