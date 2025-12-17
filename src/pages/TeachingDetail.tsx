@@ -8,9 +8,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { 
   ArrowLeft, BookOpen, Video, Clock, Edit, Share2, 
-  Download, CheckCircle, Sparkles, ExternalLink, Copy, Globe, Youtube, Image, Loader2, Trash2, Lightbulb
+  Download, CheckCircle, Sparkles, ExternalLink, Copy, Globe, Youtube, Image, Loader2, Trash2, Lightbulb,
+  Eye, Target, Gem, ListChecks, Quote
 } from 'lucide-react';
 import { CommentSection } from '@/components/comments/CommentSection';
+import { VisualConceptCard } from '@/components/teachings/VisualConceptCard';
+import { PracticalTipCard } from '@/components/teachings/PracticalTipCard';
+import { PrincipleCard } from '@/components/teachings/PrincipleCard';
+import { ApplicationSteps } from '@/components/teachings/ApplicationSteps';
 import { getSourceById, formatTimestamp } from '@/lib/seed-data';
 import {
   Dialog,
@@ -382,6 +387,83 @@ Square format (1:1) for Instagram.`
                   })}
                 </div>
               </div>
+            )}
+
+            {/* Visual Concepts Section */}
+            {teaching.visualConcepts && teaching.visualConcepts.length > 0 && (
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="font-display text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+                  <Eye className="w-5 h-5 text-accent" />
+                  Concepts visuels
+                </h3>
+                <div className="grid gap-4">
+                  {teaching.visualConcepts.map((concept, idx) => (
+                    <VisualConceptCard key={idx} concept={concept} index={idx} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Practical Tips Section */}
+            {teaching.practicalTips && teaching.practicalTips.length > 0 && (
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="font-display text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+                  <Lightbulb className="w-5 h-5 text-yellow-500" />
+                  Conseils pratiques
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {teaching.practicalTips.map((tip, idx) => (
+                    <PracticalTipCard key={idx} tip={tip} index={idx} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Citations Section */}
+            {teaching.citations && teaching.citations.length > 0 && (
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="font-display text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+                  <Quote className="w-5 h-5 text-accent" />
+                  Citations marquantes
+                </h3>
+                <div className="space-y-4">
+                  {teaching.citations.map((citation, idx) => (
+                    <blockquote 
+                      key={idx}
+                      className="border-l-4 border-gold pl-4 py-3 bg-gold/5 rounded-r-lg"
+                    >
+                      <p className="text-foreground font-medium italic">
+                        "{typeof citation === 'string' ? citation : citation.text}"
+                      </p>
+                      {typeof citation !== 'string' && citation.context && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          📍 {citation.context}
+                        </p>
+                      )}
+                    </blockquote>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Principles Section */}
+            {teaching.principles && teaching.principles.length > 0 && (
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="font-display text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+                  <Gem className="w-5 h-5 text-gold" />
+                  Principes fondamentaux
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {teaching.principles.map((principle, idx) => (
+                    <PrincipleCard key={idx} principle={principle} index={idx} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Application Steps Section */}
+            {teaching.applicationSteps && teaching.applicationSteps.length > 0 && (
+              <ApplicationSteps steps={teaching.applicationSteps} />
             )}
 
             {/* Social Posts Section - Admin only */}

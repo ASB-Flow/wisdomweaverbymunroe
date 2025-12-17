@@ -113,15 +113,60 @@ serve(async (req) => {
       const videoTitle = metadata?.title || "Enseignement";
 
       const systemPrompt = `Tu es un expert en extraction d'enseignements spirituels et de leadership à partir de contenus de Myles Munroe. 
-Tu dois extraire les points clés, créer un résumé structuré en français, et formuler des citations mémorables.
+Tu dois extraire le maximum de contenu, créer un résumé structuré en français, formuler des citations mémorables, et générer des représentations visuelles des concepts clés.
 
-Format de réponse attendu:
+IMPORTANT: Extrais le plus de contenu possible - ne te limite pas à un résumé superficiel. Analyse en profondeur chaque concept présenté.
+
+Format de réponse attendu (JSON):
 {
   "title": "Titre de l'enseignement en français",
-  "summary": "Résumé de 2-3 paragraphes",
-  "keyPoints": ["Point clé 1", "Point clé 2", "Point clé 3", "Point clé 4", "Point clé 5"],
-  "citations": ["Citation 1", "Citation 2", "Citation 3"],
-  "themes": ["thème1", "thème2"],
+  "summary": "Résumé détaillé de 3-5 paragraphes couvrant tous les aspects majeurs de l'enseignement",
+  "keyPoints": [
+    "Point clé 1 avec explication détaillée",
+    "Point clé 2 avec explication détaillée",
+    "Point clé 3 avec explication détaillée",
+    "Point clé 4 avec explication détaillée",
+    "Point clé 5 avec explication détaillée",
+    "Point clé 6 avec explication détaillée",
+    "Point clé 7 avec explication détaillée"
+  ],
+  "visualConcepts": [
+    {
+      "title": "Titre du concept visuel",
+      "type": "diagram|pyramid|cycle|comparison|timeline|mindmap",
+      "description": "Description détaillée de la figure explicative",
+      "elements": ["Élément 1", "Élément 2", "Élément 3"],
+      "explanation": "Explication de comment les éléments sont connectés"
+    }
+  ],
+  "practicalTips": [
+    {
+      "tip": "Conseil pratique concret",
+      "icon": "lightbulb|target|star|heart|book|compass",
+      "application": "Comment appliquer ce conseil dans la vie quotidienne"
+    }
+  ],
+  "citations": [
+    {
+      "text": "Citation exacte ou paraphrasée",
+      "context": "Contexte dans lequel cette citation a été donnée"
+    }
+  ],
+  "principles": [
+    {
+      "name": "Nom du principe",
+      "definition": "Définition claire du principe",
+      "importance": "Pourquoi ce principe est important"
+    }
+  ],
+  "themes": ["thème1", "thème2", "thème3"],
+  "applicationSteps": [
+    {
+      "step": 1,
+      "action": "Action concrète à faire",
+      "outcome": "Résultat attendu"
+    }
+  ],
   "socialPosts": {
     "twitter": "Post court pour Twitter (max 280 caractères)",
     "instagram": "Légende Instagram avec emojis et hashtags",
@@ -129,12 +174,20 @@ Format de réponse attendu:
   }
 }`;
 
-      const userPrompt = `Génère un enseignement complet basé sur cette vidéo YouTube de Myles Munroe:
+      const userPrompt = `Génère un enseignement COMPLET et DÉTAILLÉ basé sur cette vidéo YouTube de Myles Munroe:
 Titre: ${videoTitle}
 URL: https://youtube.com/watch?v=${videoId}
 ${theme ? `Thème souhaité: ${theme}` : ""}
 
-Crée un contenu riche et inspirant qui capture l'essence de l'enseignement.`;
+Instructions spéciales:
+1. Extrais le MAXIMUM de contenu - ne te limite pas à un résumé superficiel
+2. Crée au moins 3 concepts visuels (diagrammes, pyramides, cycles) pour représenter les idées clés
+3. Fournis au moins 5 conseils pratiques applicables immédiatement
+4. Identifie tous les principes fondamentaux enseignés
+5. Propose des étapes d'application concrètes
+6. Formule les citations de manière impactante
+
+Crée un contenu riche, profond et transformationnel qui capture toute l'essence de l'enseignement.`;
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
