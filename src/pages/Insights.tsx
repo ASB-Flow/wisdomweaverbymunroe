@@ -5,12 +5,14 @@ import { insights } from '@/lib/seed-data';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tag, SlidersHorizontal } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 // Get unique tags from all insights
 const allTags = [...new Set(insights.flatMap(i => i.tags))];
 
 export default function Insights() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const { isAdmin } = useAuth();
   
   const filteredInsights = selectedTag 
     ? insights.filter(i => i.tags.includes(selectedTag))
@@ -19,8 +21,8 @@ export default function Insights() {
   return (
     <MainLayout>
       <Header 
-        title="Insights" 
-        subtitle="Browse and manage extracted insights"
+        title="Extraits clés" 
+        subtitle="Parcourez et gérez les extraits de contenu"
       />
       
       <div className="p-8">
@@ -31,7 +33,7 @@ export default function Insights() {
             size="sm"
             onClick={() => setSelectedTag(null)}
           >
-            All ({insights.length})
+            Tous ({insights.length})
           </Button>
           
           {allTags.map(tag => (
@@ -47,10 +49,12 @@ export default function Insights() {
             </Button>
           ))}
           
-          <Button variant="outline" size="sm" className="gap-2 ml-auto">
-            <SlidersHorizontal className="w-4 h-4" />
-            Advanced Filters
-          </Button>
+          {isAdmin && (
+            <Button variant="outline" size="sm" className="gap-2 ml-auto">
+              <SlidersHorizontal className="w-4 h-4" />
+              Filtres avancés
+            </Button>
+          )}
         </div>
 
         {/* Insights Grid */}
@@ -61,14 +65,14 @@ export default function Insights() {
               className="animate-slide-up"
               style={{ animationDelay: `${index * 0.05}s` }}
             >
-              <InsightCard insight={insight} />
+              <InsightCard insight={insight} showConfidence={isAdmin} />
             </div>
           ))}
         </div>
 
         {filteredInsights.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-muted-foreground">No insights found with this filter.</p>
+            <p className="text-muted-foreground">Aucun extrait trouvé avec ce filtre.</p>
           </div>
         )}
       </div>

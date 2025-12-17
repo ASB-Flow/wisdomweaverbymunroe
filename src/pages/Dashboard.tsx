@@ -9,14 +9,22 @@ import {
   Lightbulb, 
   FileText, 
   Calendar,
-  ArrowRight
+  ArrowRight,
+  MessageCircle,
+  Heart,
+  Eye,
+  BookOpen
 } from 'lucide-react';
 import { getStats, insights, posts, sources } from '@/lib/seed-data';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useStats } from '@/hooks/useStats';
+import { useTeachingsStore } from '@/lib/teachings-store';
 
 export default function Dashboard() {
   const stats = getStats();
+  const { stats: dashboardStats, loading } = useStats();
+  const { teachings } = useTeachingsStore();
   const recentInsights = insights.slice(0, 3);
   const recentPosts = posts.filter(p => p.status !== 'draft').slice(0, 2);
   const recentSources = sources.slice(0, 2);
@@ -24,34 +32,35 @@ export default function Dashboard() {
   return (
     <MainLayout>
       <Header 
-        title="Dashboard" 
-        subtitle="Welcome back! Here's your content overview."
+        title="Tableau de bord" 
+        subtitle="Bienvenue ! Voici un aperçu de votre contenu."
       />
       
       <div className="p-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-fade-in">
           <StatCard 
-            title="Total Sources" 
-            value={stats.totalSources} 
-            icon={Video}
-            trend={{ value: 12, isPositive: true }}
+            title="Enseignements" 
+            value={dashboardStats.totalTeachings} 
+            icon={BookOpen}
+            trend={{ value: teachings.length, isPositive: true }}
           />
           <StatCard 
-            title="Insights Extracted" 
-            value={stats.totalInsights} 
-            icon={Lightbulb}
-            trend={{ value: 8, isPositive: true }}
+            title="Commentaires" 
+            value={dashboardStats.totalComments} 
+            icon={MessageCircle}
+            trend={{ value: dashboardStats.recentActivity.comments, isPositive: true }}
           />
           <StatCard 
-            title="Posts Created" 
-            value={stats.totalPosts} 
-            icon={FileText}
+            title="Favoris" 
+            value={dashboardStats.totalFavorites} 
+            icon={Heart}
+            trend={{ value: dashboardStats.recentActivity.favorites, isPositive: true }}
           />
           <StatCard 
-            title="Scheduled" 
-            value={stats.scheduledPosts} 
-            icon={Calendar}
+            title="Vues estimées" 
+            value={dashboardStats.totalViews} 
+            icon={Eye}
           />
         </div>
 
@@ -60,11 +69,11 @@ export default function Dashboard() {
           <div className="lg:col-span-2 animate-slide-up stagger-1">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-display text-xl font-semibold text-foreground">
-                Recent Insights
+                Insights récents
               </h2>
               <Link to="/insights">
                 <Button variant="ghost" size="sm" className="gap-1">
-                  View all <ArrowRight className="w-4 h-4" />
+                  Voir tout <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>
@@ -81,11 +90,11 @@ export default function Dashboard() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-display text-xl font-semibold text-foreground">
-                  Upcoming Posts
+                  Posts à venir
                 </h2>
                 <Link to="/calendar">
                   <Button variant="ghost" size="sm" className="gap-1">
-                    Calendar <ArrowRight className="w-4 h-4" />
+                    Calendrier <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
               </div>
@@ -100,11 +109,11 @@ export default function Dashboard() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-display text-xl font-semibold text-foreground">
-                  Recent Sources
+                  Sources récentes
                 </h2>
                 <Link to="/sources">
                   <Button variant="ghost" size="sm" className="gap-1">
-                    View all <ArrowRight className="w-4 h-4" />
+                    Voir tout <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
               </div>

@@ -23,10 +23,12 @@ import {
   Download
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function InsightDetail() {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
   
   const insight = getInsightById(id || '');
   const source = insight ? getSourceById(insight.sourceId) : undefined;
@@ -36,8 +38,8 @@ export default function InsightDetail() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Copied!",
-      description: "Text copied to clipboard",
+      title: "Copié !",
+      description: "Texte copié dans le presse-papiers",
     });
   };
 
@@ -46,9 +48,9 @@ export default function InsightDetail() {
       <MainLayout>
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <h1 className="text-2xl font-display font-semibold mb-2">Insight not found</h1>
+            <h1 className="text-2xl font-display font-semibold mb-2">Extrait non trouvé</h1>
             <Link to="/insights">
-              <Button variant="outline">Back to Insights</Button>
+              <Button variant="outline">Retour aux extraits</Button>
             </Link>
           </div>
         </div>
@@ -59,7 +61,7 @@ export default function InsightDetail() {
   return (
     <MainLayout>
       <Header 
-        title="Insight Detail"
+        title="Détail de l'extrait"
         subtitle={source.title}
       />
       
@@ -67,7 +69,7 @@ export default function InsightDetail() {
         {/* Back button */}
         <Link to="/insights" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" />
-          Back to Insights
+          Retour aux extraits
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -79,10 +81,12 @@ export default function InsightDetail() {
                 <h1 className="font-display text-2xl font-semibold text-foreground">
                   {insight.title}
                 </h1>
-                <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium flex-shrink-0">
-                  <Sparkles className="w-4 h-4" />
-                  {Math.round(insight.confidence * 100)}% confidence
-                </div>
+                {isAdmin && (
+                  <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium flex-shrink-0">
+                    <Sparkles className="w-4 h-4" />
+                    {Math.round(insight.confidence * 100)}% confiance
+                  </div>
+                )}
               </div>
 
               {/* Citation */}
@@ -179,29 +183,31 @@ export default function InsightDetail() {
               </div>
             )}
 
-            {/* Generated Posts */}
-            <div className="bg-card rounded-xl border border-border p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-display text-xl font-semibold">Generated Posts</h2>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Generate New
-                </Button>
+            {/* Generated Posts - Admin only */}
+            {isAdmin && (
+              <div className="bg-card rounded-xl border border-border p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-display text-xl font-semibold">Posts générés</h2>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    Générer
+                  </Button>
+                </div>
+                
+                {posts.length > 0 ? (
+                  <div className="grid gap-4">
+                    {posts.map((post) => (
+                      <PostPreview key={post.id} post={post} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground mb-4">Aucun post généré</p>
+                    <Button variant="gold">Générer des posts</Button>
+                  </div>
+                )}
               </div>
-              
-              {posts.length > 0 ? (
-                <div className="grid gap-4">
-                  {posts.map((post) => (
-                    <PostPreview key={post.id} post={post} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">No posts generated yet</p>
-                  <Button variant="gold">Generate Posts</Button>
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
           {/* Sidebar */}

@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { 
   ArrowLeft, BookOpen, Video, Clock, Edit, Share2, 
-  Download, CheckCircle, Sparkles, ExternalLink, Copy, Globe, Youtube, Image, Loader2
+  Download, CheckCircle, Sparkles, ExternalLink, Copy, Globe, Youtube, Image, Loader2, Trash2, Lightbulb
 } from 'lucide-react';
 import { CommentSection } from '@/components/comments/CommentSection';
 import { getSourceById, formatTimestamp } from '@/lib/seed-data';
@@ -19,6 +19,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Tabs,
   TabsContent,
@@ -36,12 +46,13 @@ export default function TeachingDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin } = useAuth();
-  const { getTeachingById, updateTeaching } = useTeachingsStore();
+  const { getTeachingById, updateTeaching, deleteTeaching } = useTeachingsStore();
   
   const teaching = getTeachingById(id || '');
   
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   
@@ -85,6 +96,15 @@ export default function TeachingDetail() {
         ? "L'enseignement est maintenant visible publiquement."
         : "Vos modifications ont été sauvegardées.",
     });
+  };
+
+  const handleDelete = () => {
+    deleteTeaching(teaching.id);
+    toast({
+      title: "Enseignement supprimé",
+      description: "L'enseignement a été supprimé avec succès.",
+    });
+    navigate('/teachings');
   };
 
   const handleExportPDF = () => {
@@ -206,14 +226,24 @@ Square format (1:1) for Instagram.`
             </div>
             <div className="flex gap-2 flex-wrap">
               {isAdmin && (
-                <Button 
-                  variant="outline" 
-                  className="gap-2"
-                  onClick={handleOpenEdit}
-                >
-                  <Edit className="w-4 h-4" />
-                  Modifier
-                </Button>
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="gap-2"
+                    onClick={handleOpenEdit}
+                  >
+                    <Edit className="w-4 h-4" />
+                    Modifier
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="gap-2 text-destructive hover:text-destructive"
+                    onClick={() => setShowDeleteDialog(true)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Supprimer
+                  </Button>
+                </>
               )}
               <Button 
                 variant="outline" 
@@ -234,25 +264,27 @@ Square format (1:1) for Instagram.`
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-foreground">{teaching.insights.length || contentSections.length}</p>
-              <p className="text-sm text-muted-foreground">Sections</p>
+          {/* Stats - Admin only */}
+          {isAdmin && (
+            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-foreground">{teaching.insights.length || contentSections.length}</p>
+                <p className="text-sm text-muted-foreground">Sections</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-foreground">{uniqueSources.length || (teaching.youtubeUrl ? 1 : 0)}</p>
+                <p className="text-sm text-muted-foreground">Sources vidéo</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-foreground">
+                  {teaching.insights.length > 0 
+                    ? Math.round(teaching.insights.reduce((acc, i) => acc + i.confidence, 0) / teaching.insights.length * 100)
+                    : 100}%
+                </p>
+                <p className="text-sm text-muted-foreground">Confiance</p>
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-foreground">{uniqueSources.length || (teaching.youtubeUrl ? 1 : 0)}</p>
-              <p className="text-sm text-muted-foreground">Sources vidéo</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-foreground">
-                {teaching.insights.length > 0 
-                  ? Math.round(teaching.insights.reduce((acc, i) => acc + i.confidence, 0) / teaching.insights.length * 100)
-                  : 100}%
-              </p>
-              <p className="text-sm text-muted-foreground">Confiance</p>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Content */}
@@ -268,20 +300,22 @@ Square format (1:1) for Instagram.`
                     key={insight.id}
                     className="bg-card rounded-xl border border-border p-6"
                   >
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold text-sm">
-                          {idx + 1}
+                      <div className="flex items-start justify-between gap-4 mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold text-sm">
+                            {idx + 1}
+                          </div>
+                          <h3 className="font-display text-lg font-semibold text-foreground">
+                            {insight.title}
+                          </h3>
                         </div>
-                        <h3 className="font-display text-lg font-semibold text-foreground">
-                          {insight.title}
-                        </h3>
+                        {isAdmin && (
+                          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
+                            <Sparkles className="w-3 h-3" />
+                            {Math.round(insight.confidence * 100)}%
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
-                        <Sparkles className="w-3 h-3" />
-                        {Math.round(insight.confidence * 100)}%
-                      </div>
-                    </div>
 
                     <ul className="space-y-2 mb-4">
                       {insight.bullets.map((bullet, bulletIdx) => (
@@ -294,7 +328,7 @@ Square format (1:1) for Instagram.`
 
                     <blockquote className="border-l-2 border-accent/30 pl-4 py-2 bg-muted/50 rounded-r-lg">
                       <p className="text-sm italic text-muted-foreground">"{insight.citationText}"</p>
-                      {source && (
+                      {source && isAdmin && (
                         <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
                           <Video className="w-3 h-3" />
                           {source.title} • {formatTimestamp(insight.citationStartTs)}
@@ -302,14 +336,12 @@ Square format (1:1) for Instagram.`
                       )}
                     </blockquote>
 
-                    {source && (
-                      <Link 
-                        to={`/insights/${insight.id}`}
-                        className="inline-flex items-center gap-1 text-sm text-accent hover:underline mt-4"
-                      >
-                        Voir l'insight complet <ExternalLink className="w-3 h-3" />
-                      </Link>
-                    )}
+                    <Link 
+                      to={`/insights/${insight.id}`}
+                      className="inline-flex items-center gap-1 text-sm text-accent hover:underline mt-4"
+                    >
+                      Voir les détails <ExternalLink className="w-3 h-3" />
+                    </Link>
                   </div>
                 );
               })
@@ -352,8 +384,8 @@ Square format (1:1) for Instagram.`
               </div>
             )}
 
-            {/* Social Posts Section */}
-            {teaching.socialPosts && (
+            {/* Social Posts Section - Admin only */}
+            {isAdmin && teaching.socialPosts && (
               <div className="bg-card rounded-xl border border-border p-6">
                 <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Share2 className="w-5 h-5 text-accent" />
@@ -382,8 +414,8 @@ Square format (1:1) for Instagram.`
               </div>
             )}
 
-            {/* Generated Design Section */}
-            {teaching.generatedDesign && (
+            {/* Generated Design Section - Admin only */}
+            {isAdmin && teaching.generatedDesign && (
               <div className="bg-card rounded-xl border border-border p-6">
                 <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Image className="w-5 h-5 text-accent" />
@@ -415,8 +447,8 @@ Square format (1:1) for Instagram.`
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Sources Used */}
-            {(uniqueSources.length > 0 || teaching.youtubeUrl) && (
+            {/* Sources Used - Admin only */}
+            {isAdmin && (uniqueSources.length > 0 || teaching.youtubeUrl) && (
               <div className="bg-card rounded-xl border border-border p-6">
                 <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Video className="w-5 h-5 text-accent" />
@@ -469,22 +501,24 @@ Square format (1:1) for Instagram.`
               </div>
             </div>
 
-            {/* Translation Note */}
-            <div className="bg-gold/10 rounded-xl border border-gold/20 p-6">
-              <div className="flex items-start gap-3">
-                <Sparkles className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-foreground mb-1">Contenu IA</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {teaching.youtubeUrl 
-                      ? "Ce contenu a été généré automatiquement par l'IA à partir de la vidéo source."
-                      : "Ce contenu a été automatiquement traduit de l'anglais vers le français."
-                    }
-                    {isAdmin && " Cliquez sur \"Modifier\" pour corriger d'éventuelles erreurs."}
-                  </p>
+            {/* Translation Note - Admin only */}
+            {isAdmin && (
+              <div className="bg-gold/10 rounded-xl border border-gold/20 p-6">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-1">Contenu IA</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {teaching.youtubeUrl 
+                        ? "Ce contenu a été généré automatiquement par l'IA à partir de la vidéo source."
+                        : "Ce contenu a été automatiquement traduit de l'anglais vers le français."
+                      }
+                      {" Cliquez sur \"Modifier\" pour corriger d'éventuelles erreurs."}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -691,6 +725,27 @@ Square format (1:1) for Instagram.`
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Supprimer cet enseignement ?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Cette action est irréversible. L'enseignement "{teaching.titleFr}" sera définitivement supprimé.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Supprimer
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </MainLayout>
   );

@@ -50,6 +50,7 @@ interface TeachingsState {
   teachings: Teaching[];
   addTeaching: (teaching: Teaching) => void;
   updateTeaching: (id: string, updates: Partial<Teaching>) => void;
+  deleteTeaching: (id: string) => void;
   getTeachingById: (id: string) => Teaching | undefined;
 }
 
@@ -64,6 +65,10 @@ export const useTeachingsStore = create<TeachingsState>()(
           teachings: state.teachings.map((t) =>
             t.id === id ? { ...t, ...updates } : t
           ),
+        })),
+      deleteTeaching: (id) =>
+        set((state) => ({
+          teachings: state.teachings.filter((t) => t.id !== id),
         })),
       getTeachingById: (id) => get().teachings.find((t) => t.id === id),
     }),
