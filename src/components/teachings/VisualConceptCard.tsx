@@ -71,37 +71,43 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
       {/* Visual representation of elements */}
       {concept.type === 'pyramid' && (
         <div className="mt-4 flex flex-col items-center gap-1">
-          {concept.elements.map((element, idx) => (
-            <div 
-              key={idx}
-              className={cn(
-                "px-4 py-2 rounded-lg text-center text-sm font-medium transition-all",
-                "bg-gradient-to-r from-gold/20 to-gold/10 text-foreground",
-                idx === 0 && "w-1/3",
-                idx === 1 && "w-1/2",
-                idx === 2 && "w-2/3",
-                idx >= 3 && "w-full"
-              )}
-              style={{ width: `${40 + (idx * 20)}%` }}
-            >
-              {element}
-            </div>
-          ))}
+          {concept.elements.map((element, idx) => {
+            const elementText = typeof element === 'string' ? element : JSON.stringify(element);
+            return (
+              <div 
+                key={idx}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-center text-sm font-medium transition-all",
+                  "bg-gradient-to-r from-gold/20 to-gold/10 text-foreground",
+                  idx === 0 && "w-1/3",
+                  idx === 1 && "w-1/2",
+                  idx === 2 && "w-2/3",
+                  idx >= 3 && "w-full"
+                )}
+                style={{ width: `${40 + (idx * 20)}%` }}
+              >
+                {elementText}
+              </div>
+            );
+          })}
         </div>
       )}
 
       {concept.type === 'cycle' && (
         <div className="mt-4 flex flex-wrap justify-center gap-2">
-          {concept.elements.map((element, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <div className="px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-green-700">
-                {element}
+          {concept.elements.map((element, idx) => {
+            const elementText = typeof element === 'string' ? element : JSON.stringify(element);
+            return (
+              <div key={idx} className="flex items-center gap-2">
+                <div className="px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-green-700">
+                  {elementText}
+                </div>
+                {idx < concept.elements.length - 1 && (
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                )}
               </div>
-              {idx < concept.elements.length - 1 && (
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              )}
-            </div>
-          ))}
+            );
+          })}
           {concept.elements.length > 0 && (
             <div className="flex items-center gap-2">
               <RefreshCw className="w-4 h-4 text-green-600" />
@@ -112,48 +118,57 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
 
       {(concept.type === 'diagram' || concept.type === 'mindmap') && (
         <div className="mt-4 grid grid-cols-2 gap-2">
-          {concept.elements.map((element, idx) => (
-            <div 
-              key={idx}
-              className="px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg text-sm text-blue-700 text-center"
-            >
-              {element}
-            </div>
-          ))}
+          {concept.elements.map((element, idx) => {
+            const elementText = typeof element === 'string' ? element : JSON.stringify(element);
+            return (
+              <div 
+                key={idx}
+                className="px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg text-sm text-blue-700 text-center"
+              >
+                {elementText}
+              </div>
+            );
+          })}
         </div>
       )}
 
       {concept.type === 'comparison' && (
         <div className="mt-4 grid grid-cols-2 gap-4">
-          {concept.elements.map((element, idx) => (
-            <div 
-              key={idx}
-              className={cn(
-                "px-3 py-2 rounded-lg text-sm text-center border",
-                idx % 2 === 0 
-                  ? "bg-purple-500/10 border-purple-500/20 text-purple-700"
-                  : "bg-amber-500/10 border-amber-500/20 text-amber-700"
-              )}
-            >
-              {element}
-            </div>
-          ))}
+          {concept.elements.map((element, idx) => {
+            const elementText = typeof element === 'string' ? element : JSON.stringify(element);
+            return (
+              <div 
+                key={idx}
+                className={cn(
+                  "px-3 py-2 rounded-lg text-sm text-center border",
+                  idx % 2 === 0 
+                    ? "bg-purple-500/10 border-purple-500/20 text-purple-700"
+                    : "bg-amber-500/10 border-amber-500/20 text-amber-700"
+                )}
+              >
+                {elementText}
+              </div>
+            );
+          })}
         </div>
       )}
 
       {concept.type === 'timeline' && (
         <div className="mt-4 relative">
           <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-rose-200" />
-          {concept.elements.map((element, idx) => (
-            <div key={idx} className="relative flex items-center gap-4 mb-3 last:mb-0">
-              <div className="w-8 h-8 rounded-full bg-rose-500/20 border-2 border-rose-500 flex items-center justify-center z-10">
-                <span className="text-xs font-bold text-rose-600">{idx + 1}</span>
+          {concept.elements.map((element, idx) => {
+            const elementText = typeof element === 'string' ? element : JSON.stringify(element);
+            return (
+              <div key={idx} className="relative flex items-center gap-4 mb-3 last:mb-0">
+                <div className="w-8 h-8 rounded-full bg-rose-500/20 border-2 border-rose-500 flex items-center justify-center z-10">
+                  <span className="text-xs font-bold text-rose-600">{idx + 1}</span>
+                </div>
+                <div className="flex-1 px-3 py-2 bg-rose-500/10 border border-rose-500/20 rounded-lg text-sm text-rose-700">
+                  {elementText}
+                </div>
               </div>
-              <div className="flex-1 px-3 py-2 bg-rose-500/10 border border-rose-500/20 rounded-lg text-sm text-rose-700">
-                {element}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
