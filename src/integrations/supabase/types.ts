@@ -140,6 +140,63 @@ export type Database = {
         }
         Relationships: []
       }
+      teachings: {
+        Row: {
+          application_steps: Json | null
+          citations: Json | null
+          content_fr: string
+          created_at: string
+          created_by: string | null
+          generated_design: string | null
+          id: string
+          practical_tips: Json | null
+          principles: Json | null
+          social_posts: Json | null
+          status: Database["public"]["Enums"]["teaching_status"]
+          theme: string
+          title_fr: string
+          updated_at: string
+          visual_concepts: Json | null
+          youtube_url: string | null
+        }
+        Insert: {
+          application_steps?: Json | null
+          citations?: Json | null
+          content_fr?: string
+          created_at?: string
+          created_by?: string | null
+          generated_design?: string | null
+          id?: string
+          practical_tips?: Json | null
+          principles?: Json | null
+          social_posts?: Json | null
+          status?: Database["public"]["Enums"]["teaching_status"]
+          theme: string
+          title_fr: string
+          updated_at?: string
+          visual_concepts?: Json | null
+          youtube_url?: string | null
+        }
+        Update: {
+          application_steps?: Json | null
+          citations?: Json | null
+          content_fr?: string
+          created_at?: string
+          created_by?: string | null
+          generated_design?: string | null
+          id?: string
+          practical_tips?: Json | null
+          principles?: Json | null
+          social_posts?: Json | null
+          status?: Database["public"]["Enums"]["teaching_status"]
+          theme?: string
+          title_fr?: string
+          updated_at?: string
+          visual_concepts?: Json | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -177,6 +234,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "editor" | "user"
+      teaching_status: "draft" | "review" | "published"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -305,6 +363,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor", "user"],
+      teaching_status: ["draft", "review", "published"],
     },
   },
 } as const

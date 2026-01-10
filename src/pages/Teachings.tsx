@@ -29,17 +29,18 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { useTeachingsStore, themes, Teaching } from '@/lib/teachings-store';
+import { useTeachings, themes, TeachingFrontend } from '@/hooks/useTeachings';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Teachings() {
   const { toast } = useToast();
   const { isAdmin } = useAuth();
-  const { teachings, addTeaching, updateTeaching } = useTeachingsStore();
+  const { teachings, addTeaching, updateTeaching, isLoading } = useTeachings();
   const { toggleFavorite, isFavorite } = useFavorites();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
-  const [editingTeaching, setEditingTeaching] = useState<Teaching | null>(null);
+  const [editingTeaching, setEditingTeaching] = useState<TeachingFrontend | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -62,43 +63,48 @@ export default function Teachings() {
     return matchesSearch && matchesTheme;
   });
 
-  const handleEdit = (teaching: Teaching) => {
+  const handleEdit = (teaching: TeachingFrontend) => {
     setEditingTeaching(teaching);
     setEditTitle(teaching.titleFr);
     setEditContent(teaching.contentFr);
     setGeneratedDesignUrl(teaching.generatedDesign || null);
   };
 
-  const handleSave = (publish: boolean = false) => {
+  const handleSave = async (publish: boolean = false) => {
     if (!editingTeaching) return;
-    updateTeaching(editingTeaching.id, { 
-      titleFr: editTitle, 
-      contentFr: editContent, 
-      status: publish ? 'published' : 'review',
-      generatedDesign: generatedDesignUrl || undefined
-    });
-    setEditingTeaching(null);
-    toast({ title: publish ? "Enseignement publié !" : "Modifications enregistrées" });
+    try {
+      await updateTeaching(editingTeaching.id, { 
+        titleFr: editTitle, 
+        contentFr: editContent, 
+        status: publish ? 'published' : 'review',
+        generatedDesign: generatedDesignUrl || undefined
+      });
+      setEditingTeaching(null);
+      toast({ title: publish ? "Enseignement publié !" : "Modifications enregistrées" });
+    } catch (error) {
+      // Error handled by hook
+    }
   };
 
   const handleCreateTeaching = async () => {
     if (!selectedCreateTheme) return;
     setIsCreating(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const theme = themes.find(t => t.id === selectedCreateTheme)!;
-    const newTeaching: Teaching = { 
-      id: `teaching-${teachings.length + 1}`, 
-      titleFr: `Enseignement sur ${theme.label}`, 
-      theme: theme.id, 
-      insights: [], 
-      status: 'draft', 
-      contentFr: '' 
-    };
-    addTeaching(newTeaching);
-    setIsCreating(false);
-    setShowCreateDialog(false);
-    setSelectedCreateTheme(null);
-    toast({ title: "Enseignement créé !" });
+    try {
+      const theme = themes.find(t => t.id === selectedCreateTheme)!;
+      await addTeaching({ 
+        titleFr: `Enseignement sur ${theme.label}`, 
+        theme: theme.id, 
+        status: 'draft', 
+        contentFr: '' 
+      });
+      setShowCreateDialog(false);
+      setSelectedCreateTheme(null);
+      toast({ title: "Enseignement créé !" });
+    } catch (error) {
+      // Error handled by hook
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleGenerateFromYoutube = async () => {
@@ -139,33 +145,32 @@ export default function Teachings() {
     }
   };
 
-  const handleSaveGeneratedContent = () => {
+  const handleSaveGeneratedContent = async () => {
     if (!generatedContent?.teaching) return;
 
     const teaching = generatedContent.teaching;
-    const newTeaching: Teaching = {
-      id: `teaching-${Date.now()}`,
-      titleFr: teaching.title || `Enseignement - ${generatedContent.videoTitle}`,
-      theme: selectedCreateTheme || (teaching.themes?.[0] || 'leadership'),
-      insights: [],
-      status: 'draft',
-      contentFr: formatGeneratedContent(teaching),
-      youtubeUrl,
-      socialPosts: teaching.socialPosts,
-      // Enhanced content fields
-      visualConcepts: teaching.visualConcepts,
-      practicalTips: teaching.practicalTips,
-      citations: teaching.citations,
-      principles: teaching.principles,
-      applicationSteps: teaching.applicationSteps,
-    };
-
-    addTeaching(newTeaching);
-    setShowCreateDialog(false);
-    setYoutubeUrl('');
-    setGeneratedContent(null);
-    setSelectedCreateTheme(null);
-    toast({ title: "Enseignement enregistré avec contenu enrichi !" });
+    try {
+      await addTeaching({
+        titleFr: teaching.title || `Enseignement - ${generatedContent.videoTitle}`,
+        theme: selectedCreateTheme || (teaching.themes?.[0] || 'leadership'),
+        status: 'draft',
+        contentFr: formatGeneratedContent(teaching),
+        youtubeUrl,
+        socialPosts: teaching.socialPosts,
+        visualConcepts: teaching.visualConcepts,
+        practicalTips: teaching.practicalTips,
+        citations: teaching.citations,
+        principles: teaching.principles,
+        applicationSteps: teaching.applicationSteps,
+      });
+      setShowCreateDialog(false);
+      setYoutubeUrl('');
+      setGeneratedContent(null);
+      setSelectedCreateTheme(null);
+      toast({ title: "Enseignement enregistré avec contenu enrichi !" });
+    } catch (error) {
+      // Error handled by hook
+    }
   };
 
   const formatGeneratedContent = (teaching: any): string => {
@@ -238,7 +243,7 @@ Square format (1:1) for Instagram.`
     }
   };
 
-  const getStatusBadge = (status: Teaching['status']) => {
+  const getStatusBadge = (status: TeachingFrontend['status']) => {
     if (status === 'published') return <Badge className="bg-green-100 text-green-700">Publié</Badge>;
     if (status === 'review') return <Badge className="bg-gold/20 text-gold-dark">En révision</Badge>;
     return <Badge variant="secondary">Brouillon</Badge>;
@@ -273,62 +278,91 @@ Square format (1:1) for Instagram.`
         </div>
 
         <div className="space-y-4">
-          {filteredTeachings.map(teaching => (
-            <div key={teaching.id} className="bg-card rounded-xl border border-border p-6 hover:shadow-soft transition-shadow">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center"><BookOpen className="w-5 h-5 text-accent" /></div>
-                    <div>
-                      <h3 className="font-display text-lg font-semibold text-foreground">{teaching.titleFr}</h3>
-                      {isAdmin && <p className="text-sm text-muted-foreground">{teaching.insights.length} extraits</p>}
+          {isLoading ? (
+            <>
+              {[1, 2, 3].map(i => (
+                <div key={i} className="bg-card rounded-xl border border-border p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Skeleton className="w-10 h-10 rounded-lg" />
+                        <div>
+                          <Skeleton className="h-5 w-48 mb-2" />
+                          <Skeleton className="h-4 w-24" />
+                        </div>
+                      </div>
                     </div>
+                    <Skeleton className="h-6 w-20" />
                   </div>
-                  {isAdmin && (
-                    <div className="flex items-center gap-2 mt-4 mb-3">
-                      <Video className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Sources :</span>
-                      {[...new Set(teaching.insights.map(i => i.sourceId))].slice(0, 3).map(sourceId => {
-                        const source = getSourceById(sourceId);
-                        return source ? <Badge key={sourceId} variant="secondary" className="text-xs">{source.title.slice(0, 20)}...</Badge> : null;
-                      })}
-                      {teaching.youtubeUrl && (
-                        <Badge variant="outline" className="text-xs gap-1">
-                          <Youtube className="w-3 h-3" /> YouTube
-                        </Badge>
-                      )}
-                    </div>
-                  )}
                 </div>
-                <div className="flex flex-col items-end gap-3">
-                  {getStatusBadge(teaching.status)}
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => toggleFavorite(teaching.id)}
-                      className="h-8 w-8"
-                    >
-                      <Heart 
-                        className={cn(
-                          "w-4 h-4 transition-colors",
-                          isFavorite(teaching.id) 
-                            ? "fill-destructive text-destructive" 
-                            : "text-muted-foreground hover:text-foreground"
-                        )} 
-                      />
-                    </Button>
-                    {isAdmin && (
-                      <Button variant="outline" size="sm" className="gap-1" onClick={() => handleEdit(teaching)}>
-                        <Edit className="w-3 h-3" />Modifier
-                      </Button>
+              ))}
+            </>
+          ) : filteredTeachings.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              {searchQuery || selectedTheme ? (
+                <p>Aucun enseignement trouvé pour ces critères.</p>
+              ) : (
+                <p>Aucun enseignement disponible.</p>
+              )}
+            </div>
+          ) : (
+            filteredTeachings.map(teaching => (
+              <div key={teaching.id} className="bg-card rounded-xl border border-border p-6 hover:shadow-soft transition-shadow">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center"><BookOpen className="w-5 h-5 text-accent" /></div>
+                      <div>
+                        <h3 className="font-display text-lg font-semibold text-foreground">{teaching.titleFr}</h3>
+                        {isAdmin && teaching.insights && <p className="text-sm text-muted-foreground">{teaching.insights.length} extraits</p>}
+                      </div>
+                    </div>
+                    {isAdmin && teaching.insights && teaching.insights.length > 0 && (
+                      <div className="flex items-center gap-2 mt-4 mb-3">
+                        <Video className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Sources :</span>
+                        {[...new Set(teaching.insights.map((i: any) => i.sourceId))].slice(0, 3).map((sourceId: string) => {
+                          const source = getSourceById(sourceId);
+                          return source ? <Badge key={sourceId} variant="secondary" className="text-xs">{source.title.slice(0, 20)}...</Badge> : null;
+                        })}
+                      </div>
                     )}
-                    <Link to={`/teachings/${teaching.id}`}><Button variant="outline" size="sm" className="gap-1"><Eye className="w-3 h-3" />Voir</Button></Link>
+                    {teaching.youtubeUrl && (
+                      <Badge variant="outline" className="text-xs gap-1 mt-2">
+                        <Youtube className="w-3 h-3" /> YouTube
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-3">
+                    {getStatusBadge(teaching.status)}
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => toggleFavorite(teaching.id)}
+                        className="h-8 w-8"
+                      >
+                        <Heart 
+                          className={cn(
+                            "w-4 h-4 transition-colors",
+                            isFavorite(teaching.id) 
+                              ? "fill-destructive text-destructive" 
+                              : "text-muted-foreground hover:text-foreground"
+                          )} 
+                        />
+                      </Button>
+                      {isAdmin && (
+                        <Button variant="outline" size="sm" className="gap-1" onClick={() => handleEdit(teaching)}>
+                          <Edit className="w-3 h-3" />Modifier
+                        </Button>
+                      )}
+                      <Link to={`/teachings/${teaching.id}`}><Button variant="outline" size="sm" className="gap-1"><Eye className="w-3 h-3" />Voir</Button></Link>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Create Dialog with YouTube Generation */}

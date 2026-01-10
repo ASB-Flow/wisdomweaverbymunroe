@@ -42,16 +42,17 @@ import {
 } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { useTeachingsStore, themes, Teaching } from '@/lib/teachings-store';
+import { useTeachings, themes } from '@/hooks/useTeachings';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function TeachingDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin } = useAuth();
-  const { getTeachingById, updateTeaching, deleteTeaching } = useTeachingsStore();
+  const { getTeachingById, updateTeaching, deleteTeaching, isLoading } = useTeachings();
   
   const teaching = getTeachingById(id || '');
   
@@ -67,17 +68,37 @@ export default function TeachingDetail() {
   const [generatedDesignUrl, setGeneratedDesignUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!teaching) {
+    if (!isLoading && !teaching) {
       navigate('/teachings');
     }
-  }, [teaching, navigate]);
+  }, [teaching, navigate, isLoading]);
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="p-6 md:p-8">
+          <Skeleton className="h-8 w-48 mb-6" />
+          <div className="bg-card rounded-2xl border border-border p-6 md:p-8 mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <Skeleton className="w-14 h-14 rounded-xl" />
+              <div>
+                <Skeleton className="h-6 w-24 mb-2" />
+                <Skeleton className="h-8 w-64" />
+              </div>
+            </div>
+            <Skeleton className="h-4 w-96" />
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   if (!teaching) {
     return null;
   }
 
   const theme = themes.find(t => t.id === teaching.theme) || themes[0];
-  const uniqueSources = [...new Set(teaching.insights.map(i => i.sourceId))];
+  const uniqueSources = teaching.insights ? [...new Set(teaching.insights.map((i: any) => i.sourceId))] : [];
 
   const handleOpenEdit = () => {
     setEditTitle(teaching.titleFr);
@@ -86,30 +107,38 @@ export default function TeachingDetail() {
     setShowEditDialog(true);
   };
 
-  const handleSaveEdit = (publish: boolean = false) => {
-    updateTeaching(teaching.id, {
-      titleFr: editTitle,
-      contentFr: editContent,
-      status: publish ? 'published' : teaching.status === 'published' ? 'published' : 'review',
-      generatedDesign: generatedDesignUrl || undefined
-    });
-    setShowEditDialog(false);
-    
-    toast({
-      title: publish ? "Enseignement publié !" : "Modifications enregistrées",
-      description: publish 
-        ? "L'enseignement est maintenant visible publiquement."
-        : "Vos modifications ont été sauvegardées.",
-    });
+  const handleSaveEdit = async (publish: boolean = false) => {
+    try {
+      await updateTeaching(teaching.id, {
+        titleFr: editTitle,
+        contentFr: editContent,
+        status: publish ? 'published' : teaching.status === 'published' ? 'published' : 'review',
+        generatedDesign: generatedDesignUrl || undefined
+      });
+      setShowEditDialog(false);
+      
+      toast({
+        title: publish ? "Enseignement publié !" : "Modifications enregistrées",
+        description: publish 
+          ? "L'enseignement est maintenant visible publiquement."
+          : "Vos modifications ont été sauvegardées.",
+      });
+    } catch (error) {
+      // Error handled by hook
+    }
   };
 
-  const handleDelete = () => {
-    deleteTeaching(teaching.id);
-    toast({
-      title: "Enseignement supprimé",
-      description: "L'enseignement a été supprimé avec succès.",
-    });
-    navigate('/teachings');
+  const handleDelete = async () => {
+    try {
+      await deleteTeaching(teaching.id);
+      toast({
+        title: "Enseignement supprimé",
+        description: "L'enseignement a été supprimé avec succès.",
+      });
+      navigate('/teachings');
+    } catch (error) {
+      // Error handled by hook
+    }
   };
 
   const handleExportPDF = () => {
@@ -296,9 +325,9 @@ Square format (1:1) for Instagram.`
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {teaching.insights.length > 0 ? (
+            {teaching.insights && teaching.insights.length > 0 ? (
               // Display insights if available
-              teaching.insights.map((insight, idx) => {
+              teaching.insights.map((insight: any, idx: number) => {
                 const source = getSourceById(insight.sourceId);
                 return (
                   <div 
