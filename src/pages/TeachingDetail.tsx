@@ -354,37 +354,101 @@ Square format (1:1) for Instagram.`
               // Display parsed content for AI-generated teachings
               <div className="bg-card rounded-xl border border-border p-6">
                 <div className="prose prose-sm max-w-none">
-                  {teaching.contentFr.split('\n').map((line, idx) => {
-                    if (line.startsWith('## ')) {
+                  {(() => {
+                    // Try to parse JSON content if it looks like JSON
+                    let parsedContent: any = null;
+                    const trimmedContent = teaching.contentFr.trim();
+                    
+                    if (trimmedContent.startsWith('{') || trimmedContent.startsWith('```json')) {
+                      try {
+                        const jsonStr = trimmedContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                        parsedContent = JSON.parse(jsonStr);
+                      } catch (e) {
+                        // Not valid JSON, will render as markdown
+                      }
+                    }
+                    
+                    // If we have parsed JSON content, render it properly
+                    if (parsedContent) {
                       return (
-                        <h2 key={idx} className="font-display text-xl font-bold text-foreground mt-6 mb-3 first:mt-0">
-                          {line.replace('## ', '')}
-                        </h2>
+                        <>
+                          {parsedContent.title && (
+                            <h2 className="font-display text-xl font-bold text-foreground mb-4">
+                              {parsedContent.title}
+                            </h2>
+                          )}
+                          
+                          {parsedContent.summary && (
+                            <div className="mb-6">
+                              <h3 className="font-display text-lg font-semibold text-foreground mb-2">Résumé</h3>
+                              <p className="text-foreground/80">{parsedContent.summary}</p>
+                            </div>
+                          )}
+                          
+                          {parsedContent.keyPoints?.length > 0 && (
+                            <div className="mb-6">
+                              <h3 className="font-display text-lg font-semibold text-foreground mb-3">Points clés</h3>
+                              {parsedContent.keyPoints.map((point: string, idx: number) => (
+                                <div key={idx} className="flex items-start gap-3 text-foreground/80 mb-2">
+                                  <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
+                                  <span>{typeof point === 'string' ? point : JSON.stringify(point)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          
+                          {parsedContent.citations?.length > 0 && (
+                            <div className="mb-6">
+                              <h3 className="font-display text-lg font-semibold text-foreground mb-3">Citations</h3>
+                              {parsedContent.citations.map((citation: any, idx: number) => (
+                                <blockquote key={idx} className="border-l-2 border-accent/30 pl-4 py-2 bg-muted/50 rounded-r-lg my-3">
+                                  <p className="text-sm italic text-muted-foreground">
+                                    "{typeof citation === 'string' ? citation : citation.text || JSON.stringify(citation)}"
+                                  </p>
+                                  {typeof citation !== 'string' && citation.context && (
+                                    <p className="text-xs text-muted-foreground mt-1">— {citation.context}</p>
+                                  )}
+                                </blockquote>
+                              ))}
+                            </div>
+                          )}
+                        </>
                       );
                     }
-                    if (line.startsWith('- ')) {
-                      return (
-                        <div key={idx} className="flex items-start gap-3 text-foreground/80 mb-2">
-                          <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                          <span>{line.replace('- ', '')}</span>
-                        </div>
-                      );
-                    }
-                    if (line.startsWith('> ')) {
-                      return (
-                        <blockquote key={idx} className="border-l-2 border-accent/30 pl-4 py-2 bg-muted/50 rounded-r-lg my-4">
-                          <p className="text-sm italic text-muted-foreground">{line.replace('> ', '')}</p>
-                        </blockquote>
-                      );
-                    }
-                    if (line.trim() === '---') {
-                      return <hr key={idx} className="my-6 border-border" />;
-                    }
-                    if (line.trim()) {
-                      return <p key={idx} className="text-foreground/80 mb-2">{line}</p>;
-                    }
-                    return null;
-                  })}
+                    
+                    // Fallback to markdown rendering
+                    return teaching.contentFr.split('\n').map((line, idx) => {
+                      if (line.startsWith('## ')) {
+                        return (
+                          <h2 key={idx} className="font-display text-xl font-bold text-foreground mt-6 mb-3 first:mt-0">
+                            {line.replace('## ', '')}
+                          </h2>
+                        );
+                      }
+                      if (line.startsWith('- ')) {
+                        return (
+                          <div key={idx} className="flex items-start gap-3 text-foreground/80 mb-2">
+                            <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
+                            <span>{line.replace('- ', '')}</span>
+                          </div>
+                        );
+                      }
+                      if (line.startsWith('> ')) {
+                        return (
+                          <blockquote key={idx} className="border-l-2 border-accent/30 pl-4 py-2 bg-muted/50 rounded-r-lg my-4">
+                            <p className="text-sm italic text-muted-foreground">{line.replace('> ', '')}</p>
+                          </blockquote>
+                        );
+                      }
+                      if (line.trim() === '---') {
+                        return <hr key={idx} className="my-6 border-border" />;
+                      }
+                      if (line.trim()) {
+                        return <p key={idx} className="text-foreground/80 mb-2">{line}</p>;
+                      }
+                      return null;
+                    });
+                  })()}
                 </div>
               </div>
             )}
