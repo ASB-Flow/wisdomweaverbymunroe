@@ -620,80 +620,9 @@ Square format (1:1) for Instagram.`
             <CommentSection teachingId={teaching.id} />
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar - Reserved for future content */}
           <div className="space-y-6">
-            {/* Sources Used - Admin only */}
-            {isAdmin && (uniqueSources.length > 0 || teaching.youtubeUrl) && (
-              <div className="bg-card rounded-xl border border-border p-6">
-                <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Video className="w-5 h-5 text-accent" />
-                  Sources utilisées
-                </h3>
-                <div className="space-y-3">
-                  {teaching.youtubeUrl && (
-                    <a 
-                      href={teaching.youtubeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-                    >
-                      <p className="font-medium text-foreground text-sm flex items-center gap-2">
-                        <Youtube className="w-4 h-4 text-red-500" />
-                        Vidéo YouTube source
-                      </p>
-                    </a>
-                  )}
-                  {uniqueSources.map(sourceId => {
-                    const source = getSourceById(sourceId);
-                    if (!source) return null;
-                    return (
-                      <Link 
-                        key={sourceId}
-                        to={`/sources/${sourceId}`}
-                        className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <p className="font-medium text-foreground text-sm line-clamp-1">{source.title}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                          <Clock className="w-3 h-3" />
-                          {Math.floor(source.durationSeconds / 60)} min
-                        </p>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Tags */}
-            <div className="bg-card rounded-xl border border-border p-6">
-              <h3 className="font-display text-lg font-semibold text-foreground mb-4">
-                Tags associés
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {theme.tags.map(tag => (
-                  <Badge key={tag} variant="secondary">{tag}</Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* Translation Note - Admin only */}
-            {isAdmin && (
-              <div className="bg-gold/10 rounded-xl border border-gold/20 p-6">
-                <div className="flex items-start gap-3">
-                  <Sparkles className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-1">Contenu IA</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {teaching.youtubeUrl 
-                        ? "Ce contenu a été généré automatiquement par l'IA à partir de la vidéo source."
-                        : "Ce contenu a été automatiquement traduit de l'anglais vers le français."
-                      }
-                      {" Cliquez sur \"Modifier\" pour corriger d'éventuelles erreurs."}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Sidebar content removed for cleaner layout */}
           </div>
         </div>
 
