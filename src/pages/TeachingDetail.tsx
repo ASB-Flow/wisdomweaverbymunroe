@@ -322,9 +322,9 @@ Square format (1:1) for Instagram.`
         </div>
 
         {/* Content */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="space-y-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6">
             {teaching.insights && teaching.insights.length > 0 ? (
               // Display insights if available
               teaching.insights.map((insight: any, idx: number) => {
@@ -618,11 +618,6 @@ Square format (1:1) for Instagram.`
 
             {/* Comments Section */}
             <CommentSection teachingId={teaching.id} />
-          </div>
-
-          {/* Sidebar - Reserved for future content */}
-          <div className="space-y-6">
-            {/* Sidebar content removed for cleaner layout */}
           </div>
         </div>
 
