@@ -559,33 +559,31 @@ Square format (1:1) for Instagram.`
               <ApplicationSteps steps={teaching.applicationSteps} />
             )}
 
-            {/* Social Posts Section - Admin only */}
-            {isAdmin && teaching.socialPosts && (
+            {/* LinkedIn Post Section - Admin only */}
+            {isAdmin && teaching.socialPosts?.linkedin && (
               <div className="bg-card rounded-xl border border-border p-6">
                 <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Share2 className="w-5 h-5 text-accent" />
-                  Posts réseaux sociaux
+                  Post LinkedIn
+                  <Badge variant="secondary" className="text-xs">Admin</Badge>
                 </h3>
-                <div className="space-y-4">
-                  {teaching.socialPosts.twitter && (
-                    <div className="p-4 bg-muted/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-2 font-medium">Twitter/X</p>
-                      <p className="text-sm">{teaching.socialPosts.twitter}</p>
-                    </div>
-                  )}
-                  {teaching.socialPosts.instagram && (
-                    <div className="p-4 bg-muted/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-2 font-medium">Instagram</p>
-                      <p className="text-sm">{teaching.socialPosts.instagram}</p>
-                    </div>
-                  )}
-                  {teaching.socialPosts.youtube && (
-                    <div className="p-4 bg-muted/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-2 font-medium">YouTube</p>
-                      <p className="text-sm">{teaching.socialPosts.youtube}</p>
-                    </div>
-                  )}
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm whitespace-pre-wrap">{teaching.socialPosts.linkedin}</p>
                 </div>
+                <Button 
+                  variant="outline" 
+                  className="mt-4 gap-2"
+                  onClick={() => {
+                    navigator.clipboard.writeText(teaching.socialPosts.linkedin);
+                    toast({
+                      title: "Copié !",
+                      description: "Le post LinkedIn a été copié dans le presse-papiers.",
+                    });
+                  }}
+                >
+                  <Copy className="w-4 h-4" />
+                  Copier le texte
+                </Button>
               </div>
             )}
 

@@ -44,6 +44,7 @@ export interface TeachingInput {
     twitter?: string;
     instagram?: string;
     youtube?: string;
+    linkedin?: string;
   };
   generatedDesign?: string;
   visualConcepts?: VisualConcept[];
@@ -65,6 +66,7 @@ export interface TeachingFrontend {
     twitter?: string;
     instagram?: string;
     youtube?: string;
+    linkedin?: string;
   };
   generatedDesign?: string;
   visualConcepts?: VisualConcept[];
