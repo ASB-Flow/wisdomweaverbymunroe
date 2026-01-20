@@ -47,7 +47,7 @@ export function CitationCard({ citation, isAdmin, index }: CitationCardProps) {
         body: JSON.stringify({
           type: 'generate-quote-image',
           citation: citationText,
-          author: 'Myles Munroe',
+          context: citationContext,
         }),
       });
 

@@ -13,6 +13,7 @@ interface RequestBody {
   content?: string;
   designPrompt?: string;
   citation?: string;
+  context?: string;
   author?: string;
 }
 
@@ -310,7 +311,7 @@ Aspect ratio 1:1 for Instagram.`;
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     } else if (type === "generate-quote-image") {
-      const { citation, author } = body;
+      const { citation, context } = body as { citation: string; context?: string; author?: string };
 
       if (!citation) {
         return new Response(JSON.stringify({ error: "Citation is required for quote image generation" }), {
@@ -323,13 +324,15 @@ Aspect ratio 1:1 for Instagram.`;
 
 "${citation}"
 
-${author ? `- ${author}` : "- Myles Munroe"}
+${context ? `\n📍 ${context}` : ""}
 
 Design specifications:
 - Elegant dark background with subtle gradient (deep navy blue to dark purple)
 - Golden accent elements and subtle light rays
-- The quote text must be prominently displayed in an elegant serif font, white or cream colored
+- The main quote text must be prominently displayed in an elegant serif font, white or cream colored
 - Text should be centered and easily readable
+${context ? `- Add the context explanation in smaller text at the bottom of the image, in a lighter/muted color` : ""}
+- NO author name should be displayed on the image
 - Modern, inspirational, spiritual aesthetic
 - Professional typography with proper hierarchy
 - Aspect ratio 1:1 (square format for Instagram)
@@ -382,7 +385,6 @@ Design specifications:
         success: true,
         imageUrl,
         citation,
-        author: author || "Myles Munroe",
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
