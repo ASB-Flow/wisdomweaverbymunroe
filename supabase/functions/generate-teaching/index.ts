@@ -15,6 +15,7 @@ interface RequestBody {
   citation?: string;
   context?: string;
   author?: string;
+  accentColor?: string;
 }
 
 function extractYouTubeId(url: string): string | null {
@@ -311,7 +312,12 @@ Aspect ratio 1:1 for Instagram.`;
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     } else if (type === "generate-quote-image") {
-      const { citation, context } = body as { citation: string; context?: string; author?: string };
+      const { citation, context, theme: imageTheme, accentColor } = body as { 
+        citation: string; 
+        context?: string; 
+        theme?: 'dark' | 'light' | 'gradient';
+        accentColor?: 'gold' | 'blue' | 'purple' | 'green' | 'rose';
+      };
 
       if (!citation) {
         return new Response(JSON.stringify({ error: "Citation is required for quote image generation" }), {
@@ -320,6 +326,25 @@ Aspect ratio 1:1 for Instagram.`;
         });
       }
 
+      // Theme descriptions
+      const themeDescriptions: Record<string, string> = {
+        dark: "Elegant dark background with subtle gradient (deep navy blue to dark charcoal). Text should be white or cream colored for contrast.",
+        light: "Clean, bright background with soft cream or white tones. Text should be dark navy or charcoal for contrast. Subtle texture or paper-like quality.",
+        gradient: "Beautiful gradient background transitioning from deep purple to navy blue to soft pink/coral at the edges. Text should be white or golden for contrast.",
+      };
+
+      // Accent color descriptions
+      const accentDescriptions: Record<string, string> = {
+        gold: "Warm golden/amber accent elements, decorative lines, and subtle glow effects",
+        blue: "Cool blue accent elements, decorative lines, and subtle cyan/turquoise glow effects",
+        purple: "Rich purple/violet accent elements, decorative lines, and subtle magenta glow effects",
+        green: "Fresh emerald green accent elements, decorative lines, and subtle teal glow effects",
+        rose: "Elegant rose/pink accent elements, decorative lines, and subtle coral glow effects",
+      };
+
+      const selectedTheme = themeDescriptions[imageTheme || 'dark'] || themeDescriptions.dark;
+      const selectedAccent = accentDescriptions[accentColor || 'gold'] || accentDescriptions.gold;
+
       const imagePrompt = `Create an elegant, professional social media quote card image with this exact quote text displayed beautifully on the image:
 
 "${citation}"
@@ -327,9 +352,9 @@ Aspect ratio 1:1 for Instagram.`;
 ${context ? `\n📍 ${context}` : ""}
 
 Design specifications:
-- Elegant dark background with subtle gradient (deep navy blue to dark purple)
-- Golden accent elements and subtle light rays
-- The main quote text must be prominently displayed in an elegant serif font, white or cream colored
+- ${selectedTheme}
+- ${selectedAccent}
+- The main quote text must be prominently displayed in an elegant serif font
 - Text should be centered and easily readable
 ${context ? `- Add the context explanation in smaller text at the bottom of the image, in a lighter/muted color` : ""}
 - NO author name should be displayed on the image

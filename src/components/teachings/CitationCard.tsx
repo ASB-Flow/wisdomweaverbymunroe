@@ -1,9 +1,16 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, Image, Loader2, Copy, Check } from 'lucide-react';
+import { Download, Image, Loader2, Copy, Check, Palette } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Citation {
   text: string;
@@ -16,11 +23,38 @@ interface CitationCardProps {
   index: number;
 }
 
+type ThemeOption = 'dark' | 'light' | 'gradient';
+type AccentColor = 'gold' | 'blue' | 'purple' | 'green' | 'rose';
+
+const themeLabels: Record<ThemeOption, string> = {
+  dark: 'Sombre',
+  light: 'Clair',
+  gradient: 'Dégradé',
+};
+
+const accentLabels: Record<AccentColor, string> = {
+  gold: 'Or',
+  blue: 'Bleu',
+  purple: 'Violet',
+  green: 'Vert',
+  rose: 'Rose',
+};
+
+const accentColors: Record<AccentColor, string> = {
+  gold: 'bg-amber-500',
+  blue: 'bg-blue-500',
+  purple: 'bg-purple-500',
+  green: 'bg-emerald-500',
+  rose: 'bg-rose-500',
+};
+
 export function CitationCard({ citation, isAdmin, index }: CitationCardProps) {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [theme, setTheme] = useState<ThemeOption>('dark');
+  const [accentColor, setAccentColor] = useState<AccentColor>('gold');
 
   const citationText = typeof citation === 'string' ? citation : citation.text;
   const citationContext = typeof citation !== 'string' ? citation.context : undefined;
@@ -48,6 +82,8 @@ export function CitationCard({ citation, isAdmin, index }: CitationCardProps) {
           type: 'generate-quote-image',
           citation: citationText,
           context: citationContext,
+          theme,
+          accentColor,
         }),
       });
 
@@ -117,6 +153,42 @@ export function CitationCard({ citation, isAdmin, index }: CitationCardProps) {
 
       {isAdmin && (
         <div className="mt-4 space-y-3">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              <Palette className="w-4 h-4 text-muted-foreground" />
+              <Select value={theme} onValueChange={(v) => setTheme(v as ThemeOption)}>
+                <SelectTrigger className="w-[120px] h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(themeLabels) as ThemeOption[]).map((t) => (
+                    <SelectItem key={t} value={t}>{themeLabels[t]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select value={accentColor} onValueChange={(v) => setAccentColor(v as AccentColor)}>
+                <SelectTrigger className="w-[100px] h-8 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-3 h-3 rounded-full ${accentColors[accentColor]}`} />
+                    <span>{accentLabels[accentColor]}</span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(accentLabels) as AccentColor[]).map((c) => (
+                    <SelectItem key={c} value={c}>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-3 h-3 rounded-full ${accentColors[c]}`} />
+                        <span>{accentLabels[c]}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
