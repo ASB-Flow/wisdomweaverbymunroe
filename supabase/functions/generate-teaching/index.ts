@@ -7,11 +7,13 @@ const corsHeaders = {
 };
 
 interface RequestBody {
-  type: "generate-content" | "generate-design";
+  type: "generate-content" | "generate-design" | "generate-quote-image";
   youtubeUrl?: string;
   theme?: string;
   content?: string;
   designPrompt?: string;
+  citation?: string;
+  author?: string;
 }
 
 function extractYouTubeId(url: string): string | null {
@@ -304,6 +306,83 @@ Aspect ratio 1:1 for Instagram.`;
         success: true,
         imageUrl,
         message: imageData.choices?.[0]?.message?.content,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    } else if (type === "generate-quote-image") {
+      const { citation, author } = body;
+
+      if (!citation) {
+        return new Response(JSON.stringify({ error: "Citation is required for quote image generation" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const imagePrompt = `Create an elegant, professional social media quote card image with this exact quote text displayed beautifully on the image:
+
+"${citation}"
+
+${author ? `- ${author}` : "- Myles Munroe"}
+
+Design specifications:
+- Elegant dark background with subtle gradient (deep navy blue to dark purple)
+- Golden accent elements and subtle light rays
+- The quote text must be prominently displayed in an elegant serif font, white or cream colored
+- Text should be centered and easily readable
+- Modern, inspirational, spiritual aesthetic
+- Professional typography with proper hierarchy
+- Aspect ratio 1:1 (square format for Instagram)
+- Include subtle decorative elements like quotation marks or a frame
+- The design should evoke wisdom, leadership and spiritual depth
+- Make sure the entire quote is visible and readable`;
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image-preview",
+          messages: [
+            { role: "user", content: imagePrompt },
+          ],
+          modalities: ["image", "text"],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Quote image generation error:", response.status, errorText);
+        
+        if (response.status === 429) {
+          return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (response.status === 402) {
+          return new Response(JSON.stringify({ error: "AI credits depleted. Please add credits." }), {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        
+        return new Response(JSON.stringify({ error: "Quote image generation failed" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const imageData = await response.json();
+      const imageUrl = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+      return new Response(JSON.stringify({
+        success: true,
+        imageUrl,
+        citation,
+        author: author || "Myles Munroe",
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

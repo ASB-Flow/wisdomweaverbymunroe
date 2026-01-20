@@ -16,6 +16,7 @@ import { VisualConceptCard } from '@/components/teachings/VisualConceptCard';
 import { PracticalTipCard } from '@/components/teachings/PracticalTipCard';
 import { PrincipleCard } from '@/components/teachings/PrincipleCard';
 import { ApplicationSteps } from '@/components/teachings/ApplicationSteps';
+import { CitationCard } from '@/components/teachings/CitationCard';
 import { getSourceById, formatTimestamp } from '@/lib/seed-data';
 import {
   Dialog,
@@ -518,22 +519,20 @@ Square format (1:1) for Instagram.`
                 <h3 className="font-display text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
                   <Quote className="w-5 h-5 text-accent" />
                   Citations marquantes
+                  {isAdmin && (
+                    <Badge variant="secondary" className="text-xs ml-2">
+                      Générer des images pour les réseaux sociaux
+                    </Badge>
+                  )}
                 </h3>
                 <div className="space-y-4">
                   {teaching.citations.map((citation, idx) => (
-                    <blockquote 
+                    <CitationCard 
                       key={idx}
-                      className="border-l-4 border-gold pl-4 py-3 bg-gold/5 rounded-r-lg"
-                    >
-                      <p className="text-foreground font-medium italic">
-                        "{typeof citation === 'string' ? citation : citation.text}"
-                      </p>
-                      {typeof citation !== 'string' && citation.context && (
-                        <p className="text-xs text-muted-foreground mt-2">
-                          📍 {citation.context}
-                        </p>
-                      )}
-                    </blockquote>
+                      citation={citation}
+                      isAdmin={isAdmin}
+                      index={idx}
+                    />
                   ))}
                 </div>
               </div>
