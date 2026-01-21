@@ -174,7 +174,8 @@ Format de réponse attendu (JSON):
   "socialPosts": {
     "twitter": "Post court pour Twitter (max 280 caractères)",
     "instagram": "Légende Instagram avec emojis et hashtags",
-    "youtube": "Description YouTube avec timestamps suggérés"
+    "youtube": "Description YouTube avec timestamps suggérés",
+    "linkedin": "Post LinkedIn professionnel et engageant (500-1000 caractères) avec une accroche forte, des points clés, un appel à l'action et des hashtags pertinents"
   }
 }`;
 
