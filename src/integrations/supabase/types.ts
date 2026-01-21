@@ -220,7 +220,19 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      comments_with_profiles: {
+        Row: {
+          avatar_url: string | null
+          content: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          is_own_comment: boolean | null
+          teaching_id: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

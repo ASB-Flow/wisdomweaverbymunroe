@@ -5,14 +5,12 @@ import { useAuth } from './useAuth';
 export interface Comment {
   id: string;
   teaching_id: string;
-  user_id: string;
   content: string;
   created_at: string;
   updated_at: string;
-  profile?: {
-    display_name: string | null;
-    avatar_url: string | null;
-  } | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  is_own_comment: boolean;
 }
 
 export const useComments = (teachingId: string) => {
@@ -23,9 +21,9 @@ export const useComments = (teachingId: string) => {
   const fetchComments = async () => {
     setLoading(true);
     
-    // Fetch comments first
+    // Use the secure view that doesn't expose user_id
     const { data: commentsData, error } = await supabase
-      .from('comments')
+      .from('comments_with_profiles')
       .select('*')
       .eq('teaching_id', teachingId)
       .order('created_at', { ascending: false });
@@ -36,20 +34,7 @@ export const useComments = (teachingId: string) => {
       return;
     }
 
-    // Fetch profiles separately
-    const userIds = [...new Set(commentsData.map(c => c.user_id))];
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('user_id, display_name, avatar_url')
-      .in('user_id', userIds);
-
-    const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-    
-    setComments(commentsData.map(c => ({
-      ...c,
-      profile: profileMap.get(c.user_id) || null
-    })));
-    
+    setComments(commentsData as Comment[]);
     setLoading(false);
   };
 

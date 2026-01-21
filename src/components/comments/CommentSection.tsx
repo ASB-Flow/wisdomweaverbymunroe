@@ -141,16 +141,16 @@ export const CommentSection = ({ teachingId }: CommentSectionProps) => {
             {comments.map((comment) => (
               <div key={comment.id} className="flex gap-3 p-4 rounded-lg bg-muted/50">
                 <Avatar className="h-10 w-10 flex-shrink-0">
-                  <AvatarImage src={comment.profile?.avatar_url || undefined} />
+                  <AvatarImage src={comment.avatar_url || undefined} />
                   <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                    {getInitials(comment.profile?.display_name)}
+                    {getInitials(comment.display_name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">
-                        {comment.profile?.display_name || 'Utilisateur'}
+                        {comment.display_name || 'Utilisateur'}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(comment.created_at), { 
@@ -159,7 +159,7 @@ export const CommentSection = ({ teachingId }: CommentSectionProps) => {
                         })}
                       </span>
                     </div>
-                    {user?.id === comment.user_id && (
+                    {comment.is_own_comment && (
                       <div className="flex items-center gap-1">
                         {editingId === comment.id ? (
                           <>
