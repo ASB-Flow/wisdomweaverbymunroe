@@ -94,29 +94,56 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
       )}
 
       {concept.type === 'cycle' && (
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
-          {concept.elements.map((element, idx) => {
-            const elementText = typeof element === 'string' ? element : JSON.stringify(element);
-            return (
-              <div key={idx} className="flex items-center gap-2">
-                <div className="px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-green-700">
-                  {elementText}
-                </div>
-                {idx < concept.elements.length - 1 && (
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                )}
+        <div className="mt-6 flex justify-center">
+          <div className="relative">
+            {/* Circular container */}
+            <div className="w-64 h-64 relative">
+              {/* Center circle with refresh icon */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-green-500/20 border-2 border-green-500/40 flex items-center justify-center z-10">
+                <RefreshCw className="w-6 h-6 text-green-600 animate-spin" style={{ animationDuration: '8s' }} />
               </div>
-            );
-          })}
-          {concept.elements.length > 0 && (
-            <div className="flex items-center gap-2">
-              <RefreshCw className="w-4 h-4 text-green-600" />
+              {/* Elements positioned in a circle */}
+              {concept.elements.map((element, idx) => {
+                const elementText = typeof element === 'string' ? element : JSON.stringify(element);
+                const total = concept.elements.length;
+                const angle = (idx * 360) / total - 90; // Start from top
+                const radius = 100; // Distance from center
+                const x = Math.cos((angle * Math.PI) / 180) * radius;
+                const y = Math.sin((angle * Math.PI) / 180) * radius;
+                
+                return (
+                  <div
+                    key={idx}
+                    className="absolute px-3 py-2 bg-green-500/10 border border-green-500/30 rounded-lg text-xs text-green-700 font-medium text-center max-w-[90px] whitespace-normal"
+                    style={{
+                      left: `calc(50% + ${x}px)`,
+                      top: `calc(50% + ${y}px)`,
+                      transform: 'translate(-50%, -50%)',
+                    }}
+                  >
+                    {elementText}
+                  </div>
+                );
+              })}
+              {/* Connecting arrows (circular path) */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 256 256">
+                <circle
+                  cx="128"
+                  cy="128"
+                  r="80"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeDasharray="8 4"
+                  className="text-green-300"
+                />
+              </svg>
             </div>
-          )}
+          </div>
         </div>
       )}
 
-      {(concept.type === 'diagram' || concept.type === 'mindmap') && (
+      {concept.type === 'diagram' && (
         <div className="mt-4 grid grid-cols-2 gap-2">
           {concept.elements.map((element, idx) => {
             const elementText = typeof element === 'string' ? element : JSON.stringify(element);
@@ -129,6 +156,41 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {concept.type === 'mindmap' && (
+        <div className="mt-4">
+          {/* Mindmap with branching structure */}
+          <div className="flex flex-col items-center">
+            {/* Central node */}
+            <div className="px-4 py-2 bg-cyan-500/20 border-2 border-cyan-500/40 rounded-full text-sm font-semibold text-cyan-700 mb-4">
+              {concept.title}
+            </div>
+            {/* Branches */}
+            <div className="relative w-full">
+              {/* Vertical connector line */}
+              <div className="absolute left-1/2 top-0 w-0.5 h-4 bg-cyan-300 -translate-x-1/2" />
+              {/* Horizontal connector line */}
+              <div className="absolute left-1/4 right-1/4 top-4 h-0.5 bg-cyan-300" />
+              {/* Branch nodes */}
+              <div className="flex justify-around pt-6">
+                {concept.elements.map((element, idx) => {
+                  const elementText = typeof element === 'string' ? element : JSON.stringify(element);
+                  return (
+                    <div key={idx} className="flex flex-col items-center">
+                      {/* Vertical line to node */}
+                      <div className="w-0.5 h-4 bg-cyan-300 mb-1" />
+                      {/* Leaf node */}
+                      <div className="px-3 py-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-xs text-cyan-700 text-center max-w-[100px]">
+                        {elementText}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
