@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, Image, Loader2, Copy, Check, Palette } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Download, Image, Loader2, Copy, Check, Palette, Pencil, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -55,9 +56,13 @@ export function CitationCard({ citation, isAdmin, index }: CitationCardProps) {
   const [copied, setCopied] = useState(false);
   const [theme, setTheme] = useState<ThemeOption>('dark');
   const [accentColor, setAccentColor] = useState<AccentColor>('gold');
+  const [isEditing, setIsEditing] = useState(false);
 
-  const citationText = typeof citation === 'string' ? citation : citation.text;
+  const originalCitationText = typeof citation === 'string' ? citation : citation.text;
   const citationContext = typeof citation !== 'string' ? citation.context : undefined;
+  
+  const [editedText, setEditedText] = useState(originalCitationText);
+  const citationText = editedText;
 
   const handleGenerateImage = async () => {
     setIsGenerating(true);
@@ -138,12 +143,65 @@ export function CitationCard({ citation, isAdmin, index }: CitationCardProps) {
     });
   };
 
+  const handleResetText = () => {
+    setEditedText(originalCitationText);
+    setIsEditing(false);
+  };
+
+  const hasChanges = editedText !== originalCitationText;
+
   return (
     <div className="border-l-4 border-gold pl-4 py-3 bg-gold/5 rounded-r-lg">
       <blockquote>
-        <p className="text-foreground font-medium italic">
-          "{citationText}"
-        </p>
+        {isEditing ? (
+          <div className="space-y-2">
+            <Textarea
+              value={editedText}
+              onChange={(e) => setEditedText(e.target.value)}
+              className="min-h-[100px] text-foreground font-medium italic"
+              placeholder="Texte de la citation..."
+            />
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(false)}
+                className="gap-1"
+              >
+                <Check className="w-3 h-3" />
+                Valider
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleResetText}
+                className="gap-1"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Réinitialiser
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="group relative">
+            <p className="text-foreground font-medium italic">
+              "{citationText}"
+              {hasChanges && (
+                <Badge variant="outline" className="ml-2 text-xs">modifié</Badge>
+              )}
+            </p>
+            {isAdmin && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 p-0"
+              >
+                <Pencil className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+        )}
         {citationContext && (
           <p className="text-xs text-muted-foreground mt-2">
             📍 {citationContext}
