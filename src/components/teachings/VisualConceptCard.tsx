@@ -70,26 +70,92 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
 
       {/* Visual representation of elements */}
       {concept.type === 'pyramid' && (
-        <div className="mt-4 flex flex-col items-center gap-1">
-          {concept.elements.map((element, idx) => {
-            const elementText = typeof element === 'string' ? element : JSON.stringify(element);
-            return (
-              <div 
-                key={idx}
-                className={cn(
-                  "px-4 py-2 rounded-lg text-center text-sm font-medium transition-all",
-                  "bg-gradient-to-r from-gold/20 to-gold/10 text-foreground",
-                  idx === 0 && "w-1/3",
-                  idx === 1 && "w-1/2",
-                  idx === 2 && "w-2/3",
-                  idx >= 3 && "w-full"
-                )}
-                style={{ width: `${40 + (idx * 20)}%` }}
-              >
-                {elementText}
-              </div>
-            );
-          })}
+        <div className="mt-6 flex flex-col items-center">
+          {/* SVG Pyramid Shape */}
+          <div className="relative w-full max-w-md">
+            <svg 
+              viewBox="0 0 400 300" 
+              className="w-full h-auto"
+              preserveAspectRatio="xMidYMid meet"
+            >
+              {/* Pyramid outline */}
+              <defs>
+                <linearGradient id="pyramidGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="hsl(var(--gold))" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="hsl(var(--gold))" stopOpacity="0.1" />
+                </linearGradient>
+                <linearGradient id="pyramidStroke" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="hsl(var(--gold))" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="hsl(var(--gold))" stopOpacity="0.3" />
+                </linearGradient>
+              </defs>
+              
+              {/* Main pyramid shape */}
+              <polygon
+                points="200,20 380,280 20,280"
+                fill="url(#pyramidGradient)"
+                stroke="url(#pyramidStroke)"
+                strokeWidth="2"
+              />
+              
+              {/* Horizontal level dividers */}
+              {concept.elements.map((_, idx) => {
+                if (idx === 0) return null;
+                const total = concept.elements.length;
+                const yPos = 20 + (260 / total) * idx;
+                const progress = idx / total;
+                const halfWidth = 180 * progress;
+                return (
+                  <line
+                    key={`line-${idx}`}
+                    x1={200 - halfWidth}
+                    y1={yPos}
+                    x2={200 + halfWidth}
+                    y2={yPos}
+                    stroke="hsl(var(--gold))"
+                    strokeOpacity="0.4"
+                    strokeWidth="1"
+                    strokeDasharray="4 2"
+                  />
+                );
+              })}
+            </svg>
+            
+            {/* Level labels overlaid on pyramid */}
+            <div className="absolute inset-0 flex flex-col justify-between py-4">
+              {concept.elements.map((element, idx) => {
+                const elementText = typeof element === 'string' ? element : JSON.stringify(element);
+                const total = concept.elements.length;
+                const levelHeight = 100 / total;
+                
+                return (
+                  <div 
+                    key={idx}
+                    className="flex items-center justify-center"
+                    style={{ height: `${levelHeight}%` }}
+                  >
+                    <div 
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-center text-xs sm:text-sm font-semibold",
+                        "bg-background/80 backdrop-blur-sm border border-gold/30",
+                        "text-foreground shadow-sm",
+                        "max-w-[80%] truncate"
+                      )}
+                    >
+                      <span className="text-gold font-bold mr-1.5">{idx + 1}.</span>
+                      {elementText}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* Legend */}
+          <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+            <Triangle className="w-3 h-3 text-gold" />
+            <span>Du sommet (priorité haute) à la base (fondation)</span>
+          </div>
         </div>
       )}
 
