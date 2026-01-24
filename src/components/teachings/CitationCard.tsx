@@ -151,8 +151,8 @@ export function CitationCard({ citation, isAdmin, index }: CitationCardProps) {
   const hasChanges = editedText !== originalCitationText;
 
   return (
-    <div className="border-l-4 border-gold pl-4 py-3 bg-gold/5 rounded-r-lg">
-      <blockquote>
+    <div className="border-l-4 border-gold pl-4 py-4 bg-gold/5 rounded-r-lg">
+      <blockquote className="space-y-3">
         {isEditing ? (
           <div className="space-y-2">
             <Textarea
@@ -184,10 +184,10 @@ export function CitationCard({ citation, isAdmin, index }: CitationCardProps) {
           </div>
         ) : (
           <div className="group relative">
-            <p className="text-foreground font-medium italic">
+            <p className="text-foreground font-medium italic text-base leading-relaxed">
               "{citationText}"
               {hasChanges && (
-                <Badge variant="outline" className="ml-2 text-xs">modifié</Badge>
+                <Badge variant="outline" className="ml-2 text-xs align-middle">modifié</Badge>
               )}
             </p>
             {isAdmin && (
@@ -202,10 +202,15 @@ export function CitationCard({ citation, isAdmin, index }: CitationCardProps) {
             )}
           </div>
         )}
+        
+        {/* Explanation / Context - clearly separated */}
         {citationContext && (
-          <p className="text-xs text-muted-foreground mt-2">
-            📍 {citationContext}
-          </p>
+          <div className="pt-2 border-t border-gold/20">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <span className="font-medium text-foreground/70">💡 Explication :</span>{' '}
+              {citationContext}
+            </p>
+          </div>
         )}
       </blockquote>
 
