@@ -69,67 +69,20 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
       </div>
 
       {/* Visual representation of elements */}
-      {concept.type === 'pyramid' && (
-        <div className="mt-6 flex flex-col items-center">
-          {/* Pyramid container */}
-          <div className="relative w-full max-w-2xl">
-            {/* SVG Pyramid Shape as background */}
-            <svg 
-              viewBox="0 0 400 300" 
-              className="w-full h-auto"
-              preserveAspectRatio="xMidYMid meet"
-            >
-              {/* Pyramid outline */}
-              <defs>
-                <linearGradient id={`pyramidGradient-${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="hsl(var(--gold))" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="hsl(var(--gold))" stopOpacity="0.1" />
-                </linearGradient>
-                <linearGradient id={`pyramidStroke-${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="hsl(var(--gold))" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="hsl(var(--gold))" stopOpacity="0.3" />
-                </linearGradient>
-              </defs>
-              
-              {/* Main pyramid shape */}
-              <polygon
-                points="200,20 380,280 20,280"
-                fill={`url(#pyramidGradient-${index})`}
-                stroke={`url(#pyramidStroke-${index})`}
-                strokeWidth="2"
-              />
-              
-              {/* Horizontal level dividers */}
-              {concept.elements.map((_, idx) => {
-                if (idx === 0) return null;
-                const total = concept.elements.length;
-                const yPos = 20 + (260 / total) * idx;
-                const progress = idx / total;
-                const halfWidth = 180 * progress;
-                return (
-                  <line
-                    key={`line-${idx}`}
-                    x1={200 - halfWidth}
-                    y1={yPos}
-                    x2={200 + halfWidth}
-                    y2={yPos}
-                    stroke="hsl(var(--gold))"
-                    strokeOpacity="0.4"
-                    strokeWidth="1"
-                    strokeDasharray="4 2"
-                  />
-                );
-              })}
-            </svg>
-          </div>
-          
-          {/* Level labels below pyramid - Full text visible */}
-          <div className="w-full mt-6 space-y-2">
+      {concept.type === 'pyramid' && concept.elements && concept.elements.length > 0 && (
+        <div className="mt-6 flex flex-col items-center w-full">
+          {/* Pyramid levels - each level gets progressively wider */}
+          <div className="w-full max-w-2xl space-y-1">
             {concept.elements.map((element, idx) => {
               const elementText = typeof element === 'string' ? element : JSON.stringify(element);
               const total = concept.elements.length;
-              // Width decreases as we go up (idx 0 = top = smallest)
-              const widthPercent = 50 + ((idx / (total - 1 || 1)) * 50);
+              // Width increases from top (smallest) to bottom (largest)
+              // First element (idx=0) = top = smallest width
+              const minWidth = 30;
+              const maxWidth = 100;
+              const widthPercent = total === 1 
+                ? maxWidth 
+                : minWidth + ((idx / (total - 1)) * (maxWidth - minWidth));
               
               return (
                 <div 
@@ -138,10 +91,12 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
                 >
                   <div 
                     className={cn(
-                      "px-4 py-3 rounded-lg text-center text-sm font-medium",
-                      "bg-gradient-to-r from-gold/20 via-gold/15 to-gold/10",
-                      "border border-gold/30 text-foreground",
-                      "shadow-sm"
+                      "px-4 py-3 text-center text-sm font-medium",
+                      "bg-gradient-to-b from-gold/30 to-gold/15",
+                      "border-l-2 border-r-2 border-gold/40",
+                      "text-foreground",
+                      idx === 0 && "rounded-t-xl border-t-2",
+                      idx === total - 1 && "rounded-b-xl border-b-2"
                     )}
                     style={{ width: `${widthPercent}%` }}
                   >
