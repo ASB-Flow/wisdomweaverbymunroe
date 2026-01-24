@@ -71,8 +71,9 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
       {/* Visual representation of elements */}
       {concept.type === 'pyramid' && (
         <div className="mt-6 flex flex-col items-center">
-          {/* SVG Pyramid Shape */}
-          <div className="relative w-full max-w-md">
+          {/* Pyramid container */}
+          <div className="relative w-full max-w-2xl">
+            {/* SVG Pyramid Shape as background */}
             <svg 
               viewBox="0 0 400 300" 
               className="w-full h-auto"
@@ -80,11 +81,11 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
             >
               {/* Pyramid outline */}
               <defs>
-                <linearGradient id="pyramidGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id={`pyramidGradient-${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="hsl(var(--gold))" stopOpacity="0.4" />
                   <stop offset="100%" stopColor="hsl(var(--gold))" stopOpacity="0.1" />
                 </linearGradient>
-                <linearGradient id="pyramidStroke" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id={`pyramidStroke-${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="hsl(var(--gold))" stopOpacity="0.8" />
                   <stop offset="100%" stopColor="hsl(var(--gold))" stopOpacity="0.3" />
                 </linearGradient>
@@ -93,8 +94,8 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
               {/* Main pyramid shape */}
               <polygon
                 points="200,20 380,280 20,280"
-                fill="url(#pyramidGradient)"
-                stroke="url(#pyramidStroke)"
+                fill={`url(#pyramidGradient-${index})`}
+                stroke={`url(#pyramidStroke-${index})`}
                 strokeWidth="2"
               />
               
@@ -120,35 +121,36 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
                 );
               })}
             </svg>
-            
-            {/* Level labels overlaid on pyramid */}
-            <div className="absolute inset-0 flex flex-col justify-between py-4">
-              {concept.elements.map((element, idx) => {
-                const elementText = typeof element === 'string' ? element : JSON.stringify(element);
-                const total = concept.elements.length;
-                const levelHeight = 100 / total;
-                
-                return (
+          </div>
+          
+          {/* Level labels below pyramid - Full text visible */}
+          <div className="w-full mt-6 space-y-2">
+            {concept.elements.map((element, idx) => {
+              const elementText = typeof element === 'string' ? element : JSON.stringify(element);
+              const total = concept.elements.length;
+              // Width decreases as we go up (idx 0 = top = smallest)
+              const widthPercent = 50 + ((idx / (total - 1 || 1)) * 50);
+              
+              return (
+                <div 
+                  key={idx}
+                  className="flex justify-center"
+                >
                   <div 
-                    key={idx}
-                    className="flex items-center justify-center"
-                    style={{ height: `${levelHeight}%` }}
+                    className={cn(
+                      "px-4 py-3 rounded-lg text-center text-sm font-medium",
+                      "bg-gradient-to-r from-gold/20 via-gold/15 to-gold/10",
+                      "border border-gold/30 text-foreground",
+                      "shadow-sm"
+                    )}
+                    style={{ width: `${widthPercent}%` }}
                   >
-                    <div 
-                      className={cn(
-                        "px-3 py-1.5 rounded-lg text-center text-xs sm:text-sm font-semibold",
-                        "bg-background/80 backdrop-blur-sm border border-gold/30",
-                        "text-foreground shadow-sm",
-                        "max-w-[80%] truncate"
-                      )}
-                    >
-                      <span className="text-gold font-bold mr-1.5">{idx + 1}.</span>
-                      {elementText}
-                    </div>
+                    <span className="text-gold font-bold mr-2">{idx + 1}.</span>
+                    <span className="break-words">{elementText}</span>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
           
           {/* Legend */}
