@@ -231,10 +231,37 @@ export type Database = {
           teaching_id: string | null
           updated_at: string | null
         }
+        Insert: {
+          avatar_url?: never
+          content?: string | null
+          created_at?: string | null
+          display_name?: never
+          id?: string | null
+          is_own_comment?: never
+          teaching_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: never
+          content?: string | null
+          created_at?: string | null
+          display_name?: never
+          id?: string | null
+          is_own_comment?: never
+          teaching_id?: string | null
+          updated_at?: string | null
+        }
         Relationships: []
       }
     }
     Functions: {
+      get_profile_display_info: {
+        Args: { p_user_id: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
