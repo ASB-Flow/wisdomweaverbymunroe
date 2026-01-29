@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Download, Image, Loader2, Copy, Check, Palette, Pencil, RotateCcw } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Download, Image, Loader2, Copy, Check, Palette, Pencil, RotateCcw, Quote } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -151,163 +152,173 @@ export function CitationCard({ citation, isAdmin, index }: CitationCardProps) {
   const hasChanges = editedText !== originalCitationText;
 
   return (
-    <div className="border-l-4 border-gold pl-4 py-4 bg-gold/5 rounded-r-lg">
-      <blockquote className="space-y-3">
-        {isEditing ? (
-          <div className="space-y-2">
-            <Textarea
-              value={editedText}
-              onChange={(e) => setEditedText(e.target.value)}
-              className="min-h-[100px] text-foreground font-medium italic"
-              placeholder="Texte de la citation..."
-            />
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(false)}
-                className="gap-1"
-              >
-                <Check className="w-3 h-3" />
-                Valider
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleResetText}
-                className="gap-1"
-              >
-                <RotateCcw className="w-3 h-3" />
-                Réinitialiser
-              </Button>
-            </div>
+    <Card className="overflow-hidden border-gold/30 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+      <CardContent className="p-0">
+        {/* Citation header with quote icon */}
+        <div className="flex items-start gap-3 p-4 pb-3">
+          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center">
+            <Quote className="w-4 h-4 text-gold" />
           </div>
-        ) : (
-          <div className="group relative">
-            <p className="text-foreground font-medium italic text-base leading-relaxed">
-              "{citationText}"
-              {hasChanges && (
-                <Badge variant="outline" className="ml-2 text-xs align-middle">modifié</Badge>
-              )}
-            </p>
-            {isAdmin && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-                className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 p-0"
-              >
-                <Pencil className="w-3 h-3" />
-              </Button>
+          <div className="flex-1 min-w-0">
+            {isEditing ? (
+              <div className="space-y-2">
+                <Textarea
+                  value={editedText}
+                  onChange={(e) => setEditedText(e.target.value)}
+                  className="min-h-[100px] text-foreground font-medium italic"
+                  placeholder="Texte de la citation..."
+                />
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditing(false)}
+                    className="gap-1"
+                  >
+                    <Check className="w-3 h-3" />
+                    Valider
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleResetText}
+                    className="gap-1"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Réinitialiser
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="group relative">
+                <p className="text-foreground font-medium italic text-base leading-relaxed">
+                  "{citationText}"
+                  {hasChanges && (
+                    <Badge variant="outline" className="ml-2 text-xs align-middle">modifié</Badge>
+                  )}
+                </p>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsEditing(true)}
+                    className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 p-0"
+                  >
+                    <Pencil className="w-3 h-3" />
+                  </Button>
+                )}
+              </div>
             )}
           </div>
-        )}
+        </div>
         
         {/* Explanation / Context - clearly separated */}
         {citationContext && (
-          <div className="pt-2 border-t border-gold/20">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              <span className="font-medium text-foreground/70">💡 Explication :</span>{' '}
-              {citationContext}
-            </p>
+          <div className="px-4 pb-4 pt-0 pl-[60px]">
+            <div className="p-3 rounded-lg bg-muted/50 border-l-2 border-gold/40">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <span className="font-medium text-foreground/80">💡 Explication :</span>{' '}
+                {citationContext}
+              </p>
+            </div>
           </div>
         )}
-      </blockquote>
 
-      {isAdmin && (
-        <div className="mt-4 space-y-3">
-          <div className="flex flex-wrap items-center gap-3 mb-3">
-            <div className="flex items-center gap-2">
-              <Palette className="w-4 h-4 text-muted-foreground" />
-              <Select value={theme} onValueChange={(v) => setTheme(v as ThemeOption)}>
-                <SelectTrigger className="w-[120px] h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(themeLabels) as ThemeOption[]).map((t) => (
-                    <SelectItem key={t} value={t}>{themeLabels[t]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        {isAdmin && (
+          <div className="px-4 pb-4 pt-2 border-t border-border/50 bg-muted/20">
+            <div className="flex flex-wrap items-center gap-3 mb-3">
+              <div className="flex items-center gap-2">
+                <Palette className="w-4 h-4 text-muted-foreground" />
+                <Select value={theme} onValueChange={(v) => setTheme(v as ThemeOption)}>
+                  <SelectTrigger className="w-[120px] h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(themeLabels) as ThemeOption[]).map((t) => (
+                      <SelectItem key={t} value={t}>{themeLabels[t]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select value={accentColor} onValueChange={(v) => setAccentColor(v as AccentColor)}>
+                  <SelectTrigger className="w-[100px] h-8 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-3 h-3 rounded-full ${accentColors[accentColor]}`} />
+                      <span>{accentLabels[accentColor]}</span>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(accentLabels) as AccentColor[]).map((c) => (
+                      <SelectItem key={c} value={c}>
+                        <div className="flex items-center gap-2">
+                          <span className={`w-3 h-3 rounded-full ${accentColors[c]}`} />
+                          <span>{accentLabels[c]}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Select value={accentColor} onValueChange={(v) => setAccentColor(v as AccentColor)}>
-                <SelectTrigger className="w-[100px] h-8 text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-3 h-3 rounded-full ${accentColors[accentColor]}`} />
-                    <span>{accentLabels[accentColor]}</span>
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(accentLabels) as AccentColor[]).map((c) => (
-                    <SelectItem key={c} value={c}>
-                      <div className="flex items-center gap-2">
-                        <span className={`w-3 h-3 rounded-full ${accentColors[c]}`} />
-                        <span>{accentLabels[c]}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCopy}
-              className="gap-2"
-            >
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              {copied ? 'Copié' : 'Copier'}
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleGenerateImage}
-              disabled={isGenerating}
-              className="gap-2"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Génération...
-                </>
-              ) : (
-                <>
-                  <Image className="w-4 h-4" />
-                  Générer image
-                </>
-              )}
-            </Button>
-
-            {generatedImageUrl && (
+            <div className="flex flex-wrap gap-2">
               <Button
-                variant="default"
+                variant="outline"
                 size="sm"
-                onClick={handleDownload}
+                onClick={handleCopy}
                 className="gap-2"
               >
-                <Download className="w-4 h-4" />
-                Télécharger
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? 'Copié' : 'Copier'}
               </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateImage}
+                disabled={isGenerating}
+                className="gap-2"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Génération...
+                  </>
+                ) : (
+                  <>
+                    <Image className="w-4 h-4" />
+                    Générer image
+                  </>
+                )}
+              </Button>
+
+              {generatedImageUrl && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleDownload}
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Télécharger
+                </Button>
+              )}
+            </div>
+
+            {generatedImageUrl && (
+              <div className="mt-3">
+                <Badge variant="secondary" className="mb-2 text-xs">Aperçu de l'image</Badge>
+                <img 
+                  src={generatedImageUrl} 
+                  alt={`Citation ${index + 1}`}
+                  className="w-full max-w-md rounded-lg shadow-md border border-border"
+                />
+              </div>
             )}
           </div>
-
-          {generatedImageUrl && (
-            <div className="mt-3">
-              <Badge variant="secondary" className="mb-2 text-xs">Aperçu de l'image</Badge>
-              <img 
-                src={generatedImageUrl} 
-                alt={`Citation ${index + 1}`}
-                className="w-full max-w-md rounded-lg shadow-md border border-border"
-              />
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
