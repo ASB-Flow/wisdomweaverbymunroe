@@ -40,6 +40,7 @@ export default function Teachings() {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [editingTeaching, setEditingTeaching] = useState<TeachingFrontend | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
@@ -60,8 +61,15 @@ export default function Teachings() {
   const filteredTeachings = teachings.filter(teaching => {
     const matchesSearch = teaching.titleFr.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTheme = !selectedTheme || teaching.theme === selectedTheme;
-    return matchesSearch && matchesTheme;
+    const matchesStatus = !selectedStatus || teaching.status === selectedStatus;
+    return matchesSearch && matchesTheme && matchesStatus;
   });
+
+  const statusFilters = [
+    { id: 'published', label: 'Publié', icon: CheckCircle },
+    { id: 'review', label: 'En révision', icon: Eye },
+    { id: 'draft', label: 'Brouillon', icon: Edit },
+  ];
 
   const handleEdit = (teaching: TeachingFrontend) => {
     setEditingTeaching(teaching);
@@ -264,12 +272,43 @@ Square format (1:1) for Instagram.`
           )}
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Rechercher..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input placeholder="Rechercher..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+            </div>
           </div>
-          <div className="flex gap-2 flex-wrap">
+          
+          {/* Status filter - visible for admin */}
+          {isAdmin && (
+            <div className="flex gap-2 flex-wrap items-center">
+              <span className="text-sm text-muted-foreground mr-2">Statut :</span>
+              <Button 
+                variant={selectedStatus === null ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setSelectedStatus(null)}
+              >
+                Tous
+              </Button>
+              {statusFilters.map(status => (
+                <Button 
+                  key={status.id} 
+                  variant={selectedStatus === status.id ? "default" : "outline"} 
+                  size="sm" 
+                  onClick={() => setSelectedStatus(status.id)}
+                  className="gap-1"
+                >
+                  <status.icon className="w-3 h-3" />
+                  {status.label}
+                </Button>
+              ))}
+            </div>
+          )}
+          
+          {/* Theme filter */}
+          <div className="flex gap-2 flex-wrap items-center">
+            <span className="text-sm text-muted-foreground mr-2">Thème :</span>
             <Button variant={selectedTheme === null ? "default" : "outline"} size="sm" onClick={() => setSelectedTheme(null)}>Tous</Button>
             {themes.map(theme => (
               <Button key={theme.id} variant={selectedTheme === theme.id ? "default" : "outline"} size="sm" onClick={() => setSelectedTheme(theme.id)}>{theme.label}</Button>
