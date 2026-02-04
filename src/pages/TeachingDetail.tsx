@@ -7,9 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { 
   ArrowLeft, BookOpen, Video, Clock, Edit, Share2, 
   Download, CheckCircle, Sparkles, ExternalLink, Copy, Globe, Youtube, Image, Loader2, Trash2, Lightbulb,
-  Eye, Target, Gem, ListChecks, Quote
+  Eye, Target, Gem, ListChecks, Quote, FileEdit
 } from 'lucide-react';
 import { CommentSection } from '@/components/comments/CommentSection';
 import { VisualConceptCard } from '@/components/teachings/VisualConceptCard';
@@ -201,6 +208,24 @@ Square format (1:1) for Instagram.`
     }
   };
 
+  const statusOptions = [
+    { value: 'draft', label: 'Brouillon', icon: FileEdit },
+    { value: 'review', label: 'En révision', icon: Eye },
+    { value: 'published', label: 'Publié', icon: CheckCircle },
+  ];
+
+  const handleStatusChange = async (newStatus: 'draft' | 'review' | 'published') => {
+    try {
+      await updateTeaching(teaching.id, { status: newStatus });
+      toast({
+        title: "Statut mis à jour",
+        description: `L'enseignement est maintenant "${statusOptions.find(s => s.value === newStatus)?.label}".`,
+      });
+    } catch (error) {
+      // Error handled by hook
+    }
+  };
+
   const getStatusBadge = () => {
     switch (teaching.status) {
       case 'published':
@@ -233,7 +258,28 @@ Square format (1:1) for Instagram.`
                   <BookOpen className="w-7 h-7 text-accent" />
                 </div>
                 <div>
-                  {getStatusBadge()}
+                  {isAdmin ? (
+                    <Select 
+                      value={teaching.status} 
+                      onValueChange={(value: 'draft' | 'review' | 'published') => handleStatusChange(value)}
+                    >
+                      <SelectTrigger className="w-[160px] h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex items-center gap-2">
+                              <option.icon className="w-3 h-3" />
+                              {option.label}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    getStatusBadge()
+                  )}
                   <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mt-1">
                     {teaching.titleFr}
                   </h1>
