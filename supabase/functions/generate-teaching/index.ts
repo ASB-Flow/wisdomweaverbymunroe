@@ -272,7 +272,12 @@ L'objectif est de CAPTIVER ta communauté et les INCITER à consulter chaque nou
 
       let parsedContent;
       try {
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        // Strip markdown code block wrappers before parsing
+        let cleanContent = content.trim()
+          .replace(/^```(?:json)?\s*\n?/, '')
+          .replace(/\n?\s*```\s*$/, '')
+          .trim();
+        const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
         parsedContent = jsonMatch ? JSON.parse(jsonMatch[0]) : { raw: content };
       } catch {
         parsedContent = { raw: content };
