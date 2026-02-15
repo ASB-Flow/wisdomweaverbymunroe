@@ -24,6 +24,7 @@ import { PracticalTipCard } from '@/components/teachings/PracticalTipCard';
 import { PrincipleCard } from '@/components/teachings/PrincipleCard';
 import { ApplicationSteps } from '@/components/teachings/ApplicationSteps';
 import { CitationCard } from '@/components/teachings/CitationCard';
+import { StoryCard } from '@/components/teachings/StoryCard';
 import { getSourceById, formatTimestamp } from '@/lib/seed-data';
 import {
   Dialog,
@@ -640,6 +641,21 @@ Square format (1:1) for Instagram.`
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {teaching.principles.map((principle, idx) => (
                     <PrincipleCard key={idx} principle={principle} index={idx} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Stories Section */}
+            {teaching.stories && teaching.stories.length > 0 && (
+              <div className="bg-card rounded-xl border border-border p-4 md:p-6">
+                <h3 className="font-display text-lg font-semibold text-foreground mb-4 md:mb-6 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-accent" />
+                  Histoires & Leçons
+                </h3>
+                <div className="space-y-4">
+                  {teaching.stories.map((story, idx) => (
+                    <StoryCard key={idx} story={story} index={idx} />
                   ))}
                 </div>
               </div>
