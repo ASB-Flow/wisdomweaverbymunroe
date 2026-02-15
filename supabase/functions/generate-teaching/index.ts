@@ -184,6 +184,13 @@ Format de réponse attendu (JSON):
     }
   ],
   "themes": ["thème1", "thème2", "thème3"],
+  "stories": [
+    {
+      "title": "Titre court et accrocheur de l'histoire/parabole/illustration",
+      "story": "L'histoire, parabole ou illustration racontée par Munroe, fidèlement retranscrite avec les détails narratifs importants. Utilise un style vivant et engageant.",
+      "lesson": "La leçon principale tirée de cette histoire. Ce que Munroe voulait enseigner à travers cette illustration. Formulée de manière claire et applicable."
+    }
+  ],
   "applicationSteps": [
     {
       "step": 1,
@@ -217,7 +224,8 @@ Instructions ESSENTIELLES :
 5. CITATIONS IMPACTANTES : Formule les citations de manière percutante avec leur contexte narratif.
 6. CONSEILS PRATIQUES : Au moins 5 conseils directement applicables, formulés comme des défis personnels.
 7. PLAN DE PUBLICATION : Propose un calendrier de publication avec des teasers pour chaque partie suivante.
-8. ENGAGEMENT : Intègre des questions rhétoriques, des interpellations directes au lecteur, et des moments de réflexion.
+8. HISTOIRES ET PARABOLES : Capture FIDÈLEMENT toutes les histoires, illustrations, paraboles et anecdotes racontées par Munroe. Pour chaque histoire, extrais la leçon principale enseignée. Format: Histoire complète + Leçon tirée.
+9. ENGAGEMENT : Intègre des questions rhétoriques, des interpellations directes au lecteur, et des moments de réflexion.
 
 L'objectif est de CAPTIVER ta communauté et les INCITER à consulter chaque nouvelle partie avec impatience.`;
 
