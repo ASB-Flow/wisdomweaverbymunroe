@@ -1,4 +1,5 @@
 import { ApplicationStep } from '@/lib/teachings-store';
+import { renderInlineMarkdown } from '@/lib/markdown-utils';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,11 +29,11 @@ export function ApplicationSteps({ steps }: ApplicationStepsProps) {
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-foreground mb-1">
-                {step.action}
+                {renderInlineMarkdown(step.action)}
               </h4>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <ArrowRight className="w-4 h-4 text-accent" />
-                <span>{step.outcome}</span>
+                <span>{renderInlineMarkdown(step.outcome)}</span>
               </div>
             </div>
           </div>

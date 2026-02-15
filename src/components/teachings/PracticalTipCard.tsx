@@ -1,5 +1,6 @@
 import { PracticalTip } from '@/lib/teachings-store';
 import { cn } from '@/lib/utils';
+import { renderInlineMarkdown } from '@/lib/markdown-utils';
 import { Lightbulb, Target, Star, Heart, Book, Compass } from 'lucide-react';
 
 interface PracticalTipCardProps {
@@ -40,10 +41,10 @@ export function PracticalTipCard({ tip, index }: PracticalTipCardProps) {
         </div>
         <div className="flex-1">
           <h4 className="font-semibold text-foreground mb-1">
-            {tip.tip}
+            {renderInlineMarkdown(tip.tip)}
           </h4>
           <p className="text-sm text-muted-foreground">
-            {tip.application}
+            {renderInlineMarkdown(tip.application)}
           </p>
         </div>
       </div>

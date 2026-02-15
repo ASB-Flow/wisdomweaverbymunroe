@@ -1,5 +1,6 @@
 import { VisualConcept } from '@/lib/teachings-store';
 import { cn } from '@/lib/utils';
+import { renderInlineMarkdown } from '@/lib/markdown-utils';
 import { 
   GitBranch, Triangle, RefreshCw, ArrowLeftRight, 
   Clock, Brain, ChevronRight 
@@ -60,10 +61,10 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
             </span>
           </div>
           <h4 className="font-display text-lg font-semibold text-foreground mb-2">
-            {concept.title}
+            {renderInlineMarkdown(concept.title)}
           </h4>
           <p className="text-sm text-muted-foreground mb-4">
-            {concept.description}
+            {renderInlineMarkdown(concept.description)}
           </p>
         </div>
       </div>
@@ -101,7 +102,7 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
                     style={{ width: `${widthPercent}%` }}
                   >
                     <span className="text-gold font-bold mr-2">{idx + 1}.</span>
-                    <span className="break-words">{elementText}</span>
+                    <span className="break-words">{renderInlineMarkdown(elementText)}</span>
                   </div>
                 </div>
               );
@@ -144,7 +145,7 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
                       transform: 'translate(-50%, -50%)',
                     }}
                   >
-                    {elementText}
+                    {renderInlineMarkdown(elementText)}
                   </div>
                 );
               })}
@@ -175,7 +176,7 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
                 key={idx}
                 className="px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg text-sm text-blue-700 text-center"
               >
-                {elementText}
+                {renderInlineMarkdown(elementText)}
               </div>
             );
           })}
@@ -206,7 +207,7 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
                       <div className="w-0.5 h-4 bg-cyan-300 mb-1" />
                       {/* Leaf node */}
                       <div className="px-3 py-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-xs text-cyan-700 text-center max-w-[100px]">
-                        {elementText}
+                        {renderInlineMarkdown(elementText)}
                       </div>
                     </div>
                   );
@@ -231,7 +232,7 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
                     : "bg-amber-500/10 border-amber-500/20 text-amber-700"
                 )}
               >
-                {elementText}
+                {renderInlineMarkdown(elementText)}
               </div>
             );
           })}
@@ -249,7 +250,7 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
                   <span className="text-xs font-bold text-rose-600">{idx + 1}</span>
                 </div>
                 <div className="flex-1 px-3 py-2 bg-rose-500/10 border border-rose-500/20 rounded-lg text-sm text-rose-700">
-                  {elementText}
+                  {renderInlineMarkdown(elementText)}
                 </div>
               </div>
             );
@@ -260,7 +261,7 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
       {concept.explanation && (
         <div className="mt-4 p-3 bg-muted/50 rounded-lg">
           <p className="text-sm text-muted-foreground italic">
-            💡 {concept.explanation}
+            💡 {renderInlineMarkdown(concept.explanation)}
           </p>
         </div>
       )}
