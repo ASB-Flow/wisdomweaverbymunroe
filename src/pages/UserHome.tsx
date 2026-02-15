@@ -40,7 +40,7 @@ export default function UserHome() {
         subtitle="Découvrez les enseignements et insights de Myles Munroe"
       />
 
-      <div className="p-6 space-y-8">
+      <div className="p-4 md:p-6 space-y-8">
         {/* Featured Section */}
         <section>
           <div className="flex items-center gap-2 mb-4">

@@ -153,7 +153,7 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
       )}
 
       {concept.type === 'diagram' && (
-        <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
           {concept.elements.map((element, idx) => {
             const elementText = typeof element === 'string' ? element : JSON.stringify(element);
             return (
@@ -191,7 +191,7 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
                       {/* Vertical line to node */}
                       <div className="w-0.5 h-4 bg-cyan-300 mb-1" />
                       {/* Leaf node */}
-                      <div className="px-3 py-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-xs text-cyan-700 text-center max-w-[100px]">
+                      <div className="px-3 py-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-xs text-cyan-700 text-center max-w-[120px] sm:max-w-[140px]">
                         {renderInlineMarkdown(elementText)}
                       </div>
                     </div>
@@ -204,7 +204,7 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
       )}
 
       {concept.type === 'comparison' && (
-        <div className="mt-4 grid grid-cols-2 gap-4">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {concept.elements.map((element, idx) => {
             const elementText = typeof element === 'string' ? element : JSON.stringify(element);
             return (
