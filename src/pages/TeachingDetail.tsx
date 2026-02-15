@@ -55,6 +55,20 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Helper to render inline markdown (bold, italic)
+function renderInlineMarkdown(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={i}>{part.slice(1, -1)}</em>;
+    }
+    return part;
+  });
+}
+
 export default function TeachingDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -476,10 +490,10 @@ Square format (1:1) for Instagram.`
                                   </div>
                                   <div className="text-foreground/80 whitespace-pre-line">
                                     {(part.content || '').split('\n').map((line: string, lineIdx: number) => {
-                                      if (line.startsWith('## ')) return <h4 key={lineIdx} className="font-display text-base font-semibold text-foreground mt-4 mb-2">{line.replace('## ', '')}</h4>;
-                                      if (line.startsWith('- ')) return <div key={lineIdx} className="flex items-start gap-2 mb-1"><CheckCircle className="w-3.5 h-3.5 text-accent mt-1 flex-shrink-0" /><span>{line.replace('- ', '')}</span></div>;
-                                      if (line.startsWith('> ')) return <blockquote key={lineIdx} className="border-l-2 border-accent/30 pl-3 py-1 bg-muted/50 rounded-r-lg my-2 text-sm italic text-muted-foreground">{line.replace('> ', '')}</blockquote>;
-                                      if (line.trim()) return <p key={lineIdx} className="mb-1">{line}</p>;
+                                      if (line.startsWith('## ')) return <h4 key={lineIdx} className="font-display text-base font-semibold text-foreground mt-4 mb-2">{renderInlineMarkdown(line.replace('## ', ''))}</h4>;
+                                      if (line.startsWith('- ')) return <div key={lineIdx} className="flex items-start gap-2 mb-1"><CheckCircle className="w-3.5 h-3.5 text-accent mt-1 flex-shrink-0" /><span>{renderInlineMarkdown(line.replace('- ', ''))}</span></div>;
+                                      if (line.startsWith('> ')) return <blockquote key={lineIdx} className="border-l-2 border-accent/30 pl-3 py-1 bg-muted/50 rounded-r-lg my-2 text-sm italic text-muted-foreground">{renderInlineMarkdown(line.replace('> ', ''))}</blockquote>;
+                                      if (line.trim()) return <p key={lineIdx} className="mb-1">{renderInlineMarkdown(line)}</p>;
                                       return <br key={lineIdx} />;
                                     })}
                                   </div>
@@ -512,7 +526,7 @@ Square format (1:1) for Instagram.`
                               {parsedContent.keyPoints.map((point: string, idx: number) => (
                                 <div key={idx} className="flex items-start gap-3 text-foreground/80 mb-2">
                                   <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                                  <span>{typeof point === 'string' ? point : JSON.stringify(point)}</span>
+                                  <span>{renderInlineMarkdown(typeof point === 'string' ? point : JSON.stringify(point))}</span>
                                 </div>
                               ))}
                             </div>
@@ -542,7 +556,7 @@ Square format (1:1) for Instagram.`
                       if (line.startsWith('## ')) {
                         return (
                           <h2 key={idx} className="font-display text-xl font-bold text-foreground mt-6 mb-3 first:mt-0">
-                            {line.replace('## ', '')}
+                            {renderInlineMarkdown(line.replace('## ', ''))}
                           </h2>
                         );
                       }
@@ -550,14 +564,14 @@ Square format (1:1) for Instagram.`
                         return (
                           <div key={idx} className="flex items-start gap-3 text-foreground/80 mb-2">
                             <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                            <span>{line.replace('- ', '')}</span>
+                            <span>{renderInlineMarkdown(line.replace('- ', ''))}</span>
                           </div>
                         );
                       }
                       if (line.startsWith('> ')) {
                         return (
                           <blockquote key={idx} className="border-l-2 border-accent/30 pl-4 py-2 bg-muted/50 rounded-r-lg my-4">
-                            <p className="text-sm italic text-muted-foreground">{line.replace('> ', '')}</p>
+                            <p className="text-sm italic text-muted-foreground">{renderInlineMarkdown(line.replace('> ', ''))}</p>
                           </blockquote>
                         );
                       }
@@ -565,7 +579,7 @@ Square format (1:1) for Instagram.`
                         return <hr key={idx} className="my-6 border-border" />;
                       }
                       if (line.trim()) {
-                        return <p key={idx} className="text-foreground/80 mb-2">{line}</p>;
+                        return <p key={idx} className="text-foreground/80 mb-2">{renderInlineMarkdown(line)}</p>;
                       }
                       return null;
                     });
