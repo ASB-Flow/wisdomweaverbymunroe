@@ -170,6 +170,7 @@ export default function Teachings() {
         citations: teaching.citations,
         principles: teaching.principles,
         applicationSteps: teaching.applicationSteps,
+        stories: teaching.stories,
       });
       setShowCreateDialog(false);
       setYoutubeUrl('');

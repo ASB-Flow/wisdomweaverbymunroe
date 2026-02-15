@@ -1,0 +1,1 @@
+ALTER TABLE public.teachings ADD COLUMN stories jsonb DEFAULT NULL;

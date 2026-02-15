@@ -33,6 +33,12 @@ export interface ApplicationStep {
   outcome: string;
 }
 
+export interface Story {
+  title: string;
+  story: string;
+  lesson: string;
+}
+
 // For compatibility with existing code
 export interface TeachingInput {
   titleFr: string;
@@ -52,6 +58,7 @@ export interface TeachingInput {
   citations?: Citation[];
   principles?: Principle[];
   applicationSteps?: ApplicationStep[];
+  stories?: Story[];
 }
 
 // Frontend teaching format (camelCase)
@@ -74,6 +81,7 @@ export interface TeachingFrontend {
   citations?: Citation[];
   principles?: Principle[];
   applicationSteps?: ApplicationStep[];
+  stories?: Story[];
   createdAt: string;
   updatedAt: string;
   // Legacy field for compatibility
@@ -95,6 +103,7 @@ const toFrontendTeaching = (dbTeaching: any): TeachingFrontend => ({
   citations: dbTeaching.citations || undefined,
   principles: dbTeaching.principles || undefined,
   applicationSteps: dbTeaching.application_steps || undefined,
+  stories: dbTeaching.stories || undefined,
   createdAt: dbTeaching.created_at,
   updatedAt: dbTeaching.updated_at,
   insights: [], // Legacy compatibility
@@ -135,6 +144,7 @@ export function useTeachings() {
         citations: input.citations || null,
         principles: input.principles || null,
         application_steps: input.applicationSteps || null,
+        stories: input.stories || null,
         created_by: user?.id || null,
       };
 
@@ -175,6 +185,7 @@ export function useTeachings() {
       if (updates.citations !== undefined) updateData.citations = updates.citations;
       if (updates.principles !== undefined) updateData.principles = updates.principles;
       if (updates.applicationSteps !== undefined) updateData.application_steps = updates.applicationSteps;
+      if (updates.stories !== undefined) updateData.stories = updates.stories;
 
       const { data, error } = await supabase
         .from('teachings')

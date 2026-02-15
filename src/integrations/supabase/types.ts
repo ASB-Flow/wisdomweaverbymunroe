@@ -153,6 +153,7 @@ export type Database = {
           principles: Json | null
           social_posts: Json | null
           status: Database["public"]["Enums"]["teaching_status"]
+          stories: Json | null
           theme: string
           title_fr: string
           updated_at: string
@@ -171,6 +172,7 @@ export type Database = {
           principles?: Json | null
           social_posts?: Json | null
           status?: Database["public"]["Enums"]["teaching_status"]
+          stories?: Json | null
           theme: string
           title_fr: string
           updated_at?: string
@@ -189,6 +191,7 @@ export type Database = {
           principles?: Json | null
           social_posts?: Json | null
           status?: Database["public"]["Enums"]["teaching_status"]
+          stories?: Json | null
           theme?: string
           title_fr?: string
           updated_at?: string
