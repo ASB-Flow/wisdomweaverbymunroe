@@ -118,50 +118,35 @@ export function VisualConceptCard({ concept, index }: VisualConceptCardProps) {
       )}
 
       {concept.type === 'cycle' && (
-        <div className="mt-6 flex justify-center">
-          <div className="relative">
-            {/* Circular container */}
-            <div className="w-64 h-64 relative">
-              {/* Center circle with refresh icon */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-green-500/20 border-2 border-green-500/40 flex items-center justify-center z-10">
-                <RefreshCw className="w-6 h-6 text-green-600 animate-spin" style={{ animationDuration: '8s' }} />
-              </div>
-              {/* Elements positioned in a circle */}
-              {concept.elements.map((element, idx) => {
-                const elementText = typeof element === 'string' ? element : JSON.stringify(element);
-                const total = concept.elements.length;
-                const angle = (idx * 360) / total - 90; // Start from top
-                const radius = 100; // Distance from center
-                const x = Math.cos((angle * Math.PI) / 180) * radius;
-                const y = Math.sin((angle * Math.PI) / 180) * radius;
-                
-                return (
-                  <div
-                    key={idx}
-                    className="absolute px-3 py-2 bg-green-500/10 border border-green-500/30 rounded-lg text-xs text-green-700 font-medium text-center max-w-[90px] whitespace-normal"
-                    style={{
-                      left: `calc(50% + ${x}px)`,
-                      top: `calc(50% + ${y}px)`,
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                  >
+        <div className="mt-6">
+          {/* Vertical list layout for cycle - avoids overlapping */}
+          <div className="space-y-3">
+            {concept.elements.map((element, idx) => {
+              const elementText = typeof element === 'string' ? element : JSON.stringify(element);
+              const total = concept.elements.length;
+              return (
+                <div key={idx} className="flex items-center gap-3">
+                  <div className="flex flex-col items-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-green-500/20 border-2 border-green-500/40 flex items-center justify-center">
+                      <span className="text-sm font-bold text-green-700">{idx + 1}</span>
+                    </div>
+                    {idx < total - 1 && (
+                      <div className="w-0.5 h-4 bg-green-300 mt-1" />
+                    )}
+                  </div>
+                  <div className="flex-1 px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-lg text-sm text-green-700 font-medium">
                     {renderInlineMarkdown(elementText)}
                   </div>
-                );
-              })}
-              {/* Connecting arrows (circular path) */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 256 256">
-                <circle
-                  cx="128"
-                  cy="128"
-                  r="80"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray="8 4"
-                  className="text-green-300"
-                />
-              </svg>
+                  {idx < total - 1 && (
+                    <ChevronRight className="w-4 h-4 text-green-400 flex-shrink-0 rotate-90" />
+                  )}
+                </div>
+              );
+            })}
+            {/* Loop indicator */}
+            <div className="flex items-center gap-2 justify-center text-xs text-green-600">
+              <RefreshCw className="w-4 h-4" />
+              <span>Le cycle se répète</span>
             </div>
           </div>
         </div>
