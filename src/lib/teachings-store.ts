@@ -33,6 +33,12 @@ export interface ApplicationStep {
   outcome: string;
 }
 
+export interface Story {
+  title: string;
+  story: string;
+  lesson: string;
+}
+
 export interface Teaching {
   id: string;
   titleFr: string;
@@ -53,6 +59,7 @@ export interface Teaching {
   citations?: Citation[];
   principles?: Principle[];
   applicationSteps?: ApplicationStep[];
+  stories?: Story[];
 }
 
 const themes = [
