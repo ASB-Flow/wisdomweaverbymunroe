@@ -116,83 +116,110 @@ serve(async (req) => {
       const metadata = await fetchYouTubeMetadata(videoId);
       const videoTitle = metadata?.title || "Enseignement";
 
-      const systemPrompt = `Tu es un expert en extraction d'enseignements spirituels et de leadership à partir de contenus de Myles Munroe. 
-Tu dois extraire le maximum de contenu, créer un résumé structuré en français, formuler des citations mémorables, et générer des représentations visuelles des concepts clés.
+      const systemPrompt = `Tu es un EXPERT EN NARRATION et en enseignements spirituels/leadership de Myles Munroe. 
+Tu rédiges en français des enseignements captivants, riches en illustrations, schémas et figures pour engager une communauté.
 
-IMPORTANT: Extrais le plus de contenu possible - ne te limite pas à un résumé superficiel. Analyse en profondeur chaque concept présenté.
+🎯 TON RÔLE : Transformer une vidéo en une SÉRIE D'ENSEIGNEMENTS publiables tous les 2 jours.
+
+📝 PRINCIPES DE RÉDACTION :
+- Écris comme un narrateur passionné, pas comme un résumé académique
+- Utilise des analogies, métaphores et exemples concrets du quotidien
+- Chaque partie doit être autonome mais donner envie de lire la suite
+- Intègre des questions rhétoriques pour captiver le lecteur
+- Utilise un ton direct, personnel et inspirant ("Imaginez...", "Pensez-y...", "Voici ce que cela signifie pour vous...")
+
+📊 ILLUSTRATIONS ET SCHÉMAS (TRÈS IMPORTANT) :
+- Crée des concepts visuels variés : pyramides, cycles, diagrammes, comparaisons, chronologies, cartes mentales
+- Chaque concept visuel doit avoir des éléments clairs et connectés
+- Les schémas doivent simplifier les idées complexes et les rendre mémorables
+- Utilise au minimum 4-5 concepts visuels différents
 
 Format de réponse attendu (JSON):
 {
-  "title": "Titre de l'enseignement en français",
-  "summary": "Résumé détaillé de 3-5 paragraphes couvrant tous les aspects majeurs de l'enseignement",
+  "title": "Titre accrocheur et inspirant en français",
+  "parts": [
+    {
+      "partNumber": 1,
+      "partTitle": "Titre de la partie 1",
+      "content": "Contenu narratif riche de 300-500 mots avec illustrations textuelles, analogies et exemples concrets. Utilise des sous-titres avec ##, des listes à puces, des citations en bloc avec > et des emphases avec **gras** et *italique*."
+    }
+  ],
+  "summary": "Introduction narrative captivante de 3-5 paragraphes qui donne envie de plonger dans l'enseignement. Commence par une question ou une situation du quotidien.",
   "keyPoints": [
-    "Point clé 1 avec explication détaillée",
-    "Point clé 2 avec explication détaillée",
-    "Point clé 3 avec explication détaillée",
-    "Point clé 4 avec explication détaillée",
-    "Point clé 5 avec explication détaillée",
-    "Point clé 6 avec explication détaillée",
-    "Point clé 7 avec explication détaillée"
+    "Point clé 1 : explication narrative avec exemple concret",
+    "Point clé 2 : explication narrative avec illustration",
+    "Point clé 3 : explication narrative avec application pratique",
+    "Point clé 4 : explication avec analogie mémorable",
+    "Point clé 5 : explication avec impact transformationnel",
+    "Point clé 6 : explication avec connexion au quotidien",
+    "Point clé 7 : explication avec vision inspirante"
   ],
   "visualConcepts": [
     {
       "title": "Titre du concept visuel",
       "type": "diagram|pyramid|cycle|comparison|timeline|mindmap",
-      "description": "Description détaillée de la figure explicative",
-      "elements": ["Élément 1", "Élément 2", "Élément 3"],
-      "explanation": "Explication de comment les éléments sont connectés"
+      "description": "Description détaillée et narrative de la figure",
+      "elements": ["Élément 1", "Élément 2", "Élément 3", "Élément 4"],
+      "explanation": "Explication narrative de comment les éléments interagissent - comme si tu racontais une histoire"
     }
   ],
   "practicalTips": [
     {
-      "tip": "Conseil pratique concret",
+      "tip": "Conseil pratique formulé de manière engageante et directe",
       "icon": "lightbulb|target|star|heart|book|compass",
-      "application": "Comment appliquer ce conseil dans la vie quotidienne"
+      "application": "Scénario concret du quotidien montrant comment appliquer ce conseil"
     }
   ],
   "citations": [
     {
-      "text": "Citation exacte ou paraphrasée",
-      "context": "Contexte dans lequel cette citation a été donnée"
+      "text": "Citation impactante et mémorable",
+      "context": "Contexte narratif : dans quelle situation Munroe a prononcé ces mots et pourquoi c'est puissant"
     }
   ],
   "principles": [
     {
-      "name": "Nom du principe",
-      "definition": "Définition claire du principe",
-      "importance": "Pourquoi ce principe est important"
+      "name": "Nom du principe (court et mémorable)",
+      "definition": "Définition claire avec une analogie ou métaphore",
+      "importance": "Pourquoi ce principe peut transformer votre vie - avec un exemple concret"
     }
   ],
   "themes": ["thème1", "thème2", "thème3"],
   "applicationSteps": [
     {
       "step": 1,
-      "action": "Action concrète à faire",
-      "outcome": "Résultat attendu"
+      "action": "Action concrète formulée comme un défi personnel",
+      "outcome": "Transformation attendue décrite de manière inspirante"
     }
   ],
+  "publishingPlan": {
+    "totalParts": 3,
+    "frequencyDays": 2,
+    "hookForNextPart": "Teaser pour inciter à revenir pour la partie suivante"
+  },
   "socialPosts": {
-    "twitter": "Post court pour Twitter (max 280 caractères)",
-    "instagram": "Légende Instagram avec emojis et hashtags",
-    "youtube": "Description YouTube avec timestamps suggérés",
-    "linkedin": "Post LinkedIn professionnel et engageant (500-1000 caractères) avec une accroche forte, des points clés, un appel à l'action et des hashtags pertinents"
+    "twitter": "Post percutant pour Twitter (max 280 caractères) avec une question ou citation forte",
+    "instagram": "Légende Instagram narrative avec emojis, storytelling et hashtags",
+    "youtube": "Description YouTube engageante avec timestamps suggérés",
+    "linkedin": "Post LinkedIn storytelling (500-1000 caractères) : accroche émotionnelle, leçon clé, appel à l'action et hashtags"
   }
 }`;
 
-      const userPrompt = `Génère un enseignement COMPLET et DÉTAILLÉ basé sur cette vidéo YouTube de Myles Munroe:
+      const userPrompt = `Transforme cette vidéo YouTube de Myles Munroe en une SÉRIE D'ENSEIGNEMENTS NARRATIFS captivants en français :
 Titre: ${videoTitle}
 URL: https://youtube.com/watch?v=${videoId}
 ${theme ? `Thème souhaité: ${theme}` : ""}
 
-Instructions spéciales:
-1. Extrais le MAXIMUM de contenu - ne te limite pas à un résumé superficiel
-2. Crée au moins 3 concepts visuels (diagrammes, pyramides, cycles) pour représenter les idées clés
-3. Fournis au moins 5 conseils pratiques applicables immédiatement
-4. Identifie tous les principes fondamentaux enseignés
-5. Propose des étapes d'application concrètes
-6. Formule les citations de manière impactante
+Instructions ESSENTIELLES :
+1. NARRATION : Écris comme un conteur passionné. Commence par une situation du quotidien ou une question provocante. Utilise des transitions narratives entre les idées.
+2. PARTIES : Divise l'enseignement en 2-4 parties publiables tous les 2 jours. Chaque partie doit avoir un arc narratif complet avec une accroche et une conclusion qui donne envie de lire la suite.
+3. ILLUSTRATIONS VISUELLES : Crée au moins 5 concepts visuels (pyramides, cycles, diagrammes, comparaisons, chronologies, cartes mentales) pour rendre les idées mémorables et partageables.
+4. EXEMPLES CONCRETS : Chaque principe doit être illustré par un exemple de la vie quotidienne (famille, travail, relations).
+5. CITATIONS IMPACTANTES : Formule les citations de manière percutante avec leur contexte narratif.
+6. CONSEILS PRATIQUES : Au moins 5 conseils directement applicables, formulés comme des défis personnels.
+7. PLAN DE PUBLICATION : Propose un calendrier de publication avec des teasers pour chaque partie suivante.
+8. ENGAGEMENT : Intègre des questions rhétoriques, des interpellations directes au lecteur, et des moments de réflexion.
 
-Crée un contenu riche, profond et transformationnel qui capture toute l'essence de l'enseignement.`;
+L'objectif est de CAPTIVER ta communauté et les INCITER à consulter chaque nouvelle partie avec impatience.`;
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",

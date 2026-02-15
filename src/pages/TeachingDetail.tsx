@@ -456,14 +456,59 @@ Square format (1:1) for Instagram.`
                           
                           {parsedContent.summary && (
                             <div className="mb-6">
-                              <h3 className="font-display text-lg font-semibold text-foreground mb-2">Résumé</h3>
-                              <p className="text-foreground/80">{parsedContent.summary}</p>
+                              <h3 className="font-display text-lg font-semibold text-foreground mb-2">📖 Introduction</h3>
+                              <p className="text-foreground/80 whitespace-pre-line">{parsedContent.summary}</p>
+                            </div>
+                          )}
+
+                          {/* Parts - Serial publishing sections */}
+                          {parsedContent.parts?.length > 0 && (
+                            <div className="mb-6 space-y-6">
+                              {parsedContent.parts.map((part: any, idx: number) => (
+                                <div key={idx} className="border border-border rounded-xl p-5 bg-muted/30">
+                                  <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold text-sm">
+                                      {part.partNumber || idx + 1}
+                                    </div>
+                                    <h3 className="font-display text-lg font-semibold text-foreground">
+                                      {part.partTitle || `Partie ${idx + 1}`}
+                                    </h3>
+                                  </div>
+                                  <div className="text-foreground/80 whitespace-pre-line">
+                                    {(part.content || '').split('\n').map((line: string, lineIdx: number) => {
+                                      if (line.startsWith('## ')) return <h4 key={lineIdx} className="font-display text-base font-semibold text-foreground mt-4 mb-2">{line.replace('## ', '')}</h4>;
+                                      if (line.startsWith('- ')) return <div key={lineIdx} className="flex items-start gap-2 mb-1"><CheckCircle className="w-3.5 h-3.5 text-accent mt-1 flex-shrink-0" /><span>{line.replace('- ', '')}</span></div>;
+                                      if (line.startsWith('> ')) return <blockquote key={lineIdx} className="border-l-2 border-accent/30 pl-3 py-1 bg-muted/50 rounded-r-lg my-2 text-sm italic text-muted-foreground">{line.replace('> ', '')}</blockquote>;
+                                      if (line.trim()) return <p key={lineIdx} className="mb-1">{line}</p>;
+                                      return <br key={lineIdx} />;
+                                    })}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Publishing plan */}
+                          {parsedContent.publishingPlan && (
+                            <div className="mb-6 p-4 bg-accent/10 border border-accent/20 rounded-xl">
+                              <h3 className="font-display text-sm font-semibold text-accent mb-2 flex items-center gap-2">
+                                <Clock className="w-4 h-4" />
+                                Plan de publication
+                              </h3>
+                              <p className="text-sm text-foreground/80">
+                                📅 {parsedContent.publishingPlan.totalParts} parties • Publication tous les {parsedContent.publishingPlan.frequencyDays} jours
+                              </p>
+                              {parsedContent.publishingPlan.hookForNextPart && (
+                                <p className="text-sm text-muted-foreground mt-1 italic">
+                                  🔜 {parsedContent.publishingPlan.hookForNextPart}
+                                </p>
+                              )}
                             </div>
                           )}
                           
                           {parsedContent.keyPoints?.length > 0 && (
                             <div className="mb-6">
-                              <h3 className="font-display text-lg font-semibold text-foreground mb-3">Points clés</h3>
+                              <h3 className="font-display text-lg font-semibold text-foreground mb-3">🔑 Points clés</h3>
                               {parsedContent.keyPoints.map((point: string, idx: number) => (
                                 <div key={idx} className="flex items-start gap-3 text-foreground/80 mb-2">
                                   <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
@@ -475,7 +520,7 @@ Square format (1:1) for Instagram.`
                           
                           {parsedContent.citations?.length > 0 && (
                             <div className="mb-6">
-                              <h3 className="font-display text-lg font-semibold text-foreground mb-3">Citations</h3>
+                              <h3 className="font-display text-lg font-semibold text-foreground mb-3">💬 Citations</h3>
                               {parsedContent.citations.map((citation: any, idx: number) => (
                                 <blockquote key={idx} className="border-l-2 border-accent/30 pl-4 py-2 bg-muted/50 rounded-r-lg my-3">
                                   <p className="text-sm italic text-muted-foreground">
