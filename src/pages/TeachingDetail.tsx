@@ -437,10 +437,18 @@ Square format (1:1) for Instagram.`
                     let parsedContent: any = null;
                     const trimmedContent = teaching.contentFr.trim();
                     
-                    if (trimmedContent.startsWith('{') || trimmedContent.startsWith('```json')) {
+                    if (trimmedContent.startsWith('{') || trimmedContent.startsWith('```json') || trimmedContent.startsWith('```')) {
                       try {
-                        const jsonStr = trimmedContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-                        parsedContent = JSON.parse(jsonStr);
+                        // Strip various markdown code block wrappers
+                        let jsonStr = trimmedContent
+                          .replace(/^```(?:json)?\s*\n?/, '')
+                          .replace(/\n?\s*```\s*$/, '')
+                          .trim();
+                        // Also try extracting the first JSON object if there's extra text
+                        const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+                        if (jsonMatch) {
+                          parsedContent = JSON.parse(jsonMatch[0]);
+                        }
                       } catch (e) {
                         // Not valid JSON, will render as markdown
                       }
