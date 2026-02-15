@@ -317,7 +317,7 @@ Square format (1:1) for Instagram.`
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-8">
           {isLoading ? (
             <>
               {[1, 2, 3].map(i => (
@@ -346,62 +346,99 @@ Square format (1:1) for Instagram.`
               )}
             </div>
           ) : (
-            filteredTeachings.map(teaching => (
-              <div key={teaching.id} className="bg-card rounded-xl border border-border p-4 md:p-6 hover:shadow-soft transition-shadow">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-2 md:gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center"><BookOpen className="w-5 h-5 text-accent" /></div>
-                      <div>
-                        <h3 className="font-display text-lg font-semibold text-foreground">{teaching.titleFr}</h3>
-                        {isAdmin && teaching.insights && <p className="text-sm text-muted-foreground">{teaching.insights.length} extraits</p>}
+            // Group teachings by theme
+            (() => {
+              const grouped = filteredTeachings.reduce<Record<string, TeachingFrontend[]>>((acc, teaching) => {
+                const themeId = teaching.theme;
+                if (!acc[themeId]) acc[themeId] = [];
+                acc[themeId].push(teaching);
+                return acc;
+              }, {});
+
+              // Sort theme groups by the themes array order
+              const sortedThemeIds = themes
+                .map(t => t.id)
+                .filter(id => grouped[id]);
+              
+              // Add any themes not in the predefined list
+              Object.keys(grouped).forEach(id => {
+                if (!sortedThemeIds.includes(id)) sortedThemeIds.push(id);
+              });
+
+              return sortedThemeIds.map(themeId => {
+                const themeLabel = themes.find(t => t.id === themeId)?.label || themeId;
+                const themeTeachings = grouped[themeId];
+
+                return (
+                  <section key={themeId}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <BookOpen className="w-4 h-4 text-primary" />
                       </div>
+                      <h2 className="font-display text-xl font-semibold text-foreground">{themeLabel}</h2>
+                      <Badge variant="secondary" className="text-xs">{themeTeachings.length}</Badge>
                     </div>
-                    {isAdmin && teaching.insights && teaching.insights.length > 0 && (
-                      <div className="flex items-center gap-2 mt-4 mb-3">
-                        <Video className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">Sources :</span>
-                        {[...new Set(teaching.insights.map((i: any) => i.sourceId))].slice(0, 3).map((sourceId: string) => {
-                          const source = getSourceById(sourceId);
-                          return source ? <Badge key={sourceId} variant="secondary" className="text-xs">{source.title.slice(0, 20)}...</Badge> : null;
-                        })}
-                      </div>
-                    )}
-                    {teaching.youtubeUrl && (
-                      <Badge variant="outline" className="text-xs gap-1 mt-2">
-                        <Youtube className="w-3 h-3" /> YouTube
-                      </Badge>
-                    )}
-                  </div>
-            <div className="flex flex-row items-center gap-2 mt-3 md:mt-0 md:flex-col md:items-end md:gap-3">
-                    {getStatusBadge(teaching.status)}
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => toggleFavorite(teaching.id)}
-                        className="h-8 w-8"
-                      >
-                        <Heart 
-                          className={cn(
-                            "w-4 h-4 transition-colors",
-                            isFavorite(teaching.id) 
-                              ? "fill-destructive text-destructive" 
-                              : "text-muted-foreground hover:text-foreground"
-                          )} 
-                        />
-                      </Button>
-                      {isAdmin && (
-                        <Button variant="outline" size="sm" className="gap-1" onClick={() => handleEdit(teaching)}>
-                          <Edit className="w-3 h-3" />Modifier
-                        </Button>
-                      )}
-                      <Link to={`/teachings/${teaching.id}`}><Button variant="outline" size="sm" className="gap-1"><Eye className="w-3 h-3" />Voir</Button></Link>
+                    <div className="space-y-3 ml-0 md:ml-11">
+                      {themeTeachings.map(teaching => (
+                        <div key={teaching.id} className="bg-card rounded-xl border border-border p-4 md:p-6 hover:shadow-soft transition-shadow">
+                          <div className="flex flex-col md:flex-row md:items-start justify-between gap-2 md:gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div>
+                                  <h3 className="font-display text-lg font-semibold text-foreground">{teaching.titleFr}</h3>
+                                  {isAdmin && teaching.insights && <p className="text-sm text-muted-foreground">{teaching.insights.length} extraits</p>}
+                                </div>
+                              </div>
+                              {isAdmin && teaching.insights && teaching.insights.length > 0 && (
+                                <div className="flex items-center gap-2 mt-4 mb-3">
+                                  <Video className="w-4 h-4 text-muted-foreground" />
+                                  <span className="text-sm text-muted-foreground">Sources :</span>
+                                  {[...new Set(teaching.insights.map((i: any) => i.sourceId))].slice(0, 3).map((sourceId: string) => {
+                                    const source = getSourceById(sourceId);
+                                    return source ? <Badge key={sourceId} variant="secondary" className="text-xs">{source.title.slice(0, 20)}...</Badge> : null;
+                                  })}
+                                </div>
+                              )}
+                              {teaching.youtubeUrl && (
+                                <Badge variant="outline" className="text-xs gap-1 mt-2">
+                                  <Youtube className="w-3 h-3" /> YouTube
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex flex-row items-center gap-2 mt-3 md:mt-0 md:flex-col md:items-end md:gap-3">
+                              {getStatusBadge(teaching.status)}
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => toggleFavorite(teaching.id)}
+                                  className="h-8 w-8"
+                                >
+                                  <Heart 
+                                    className={cn(
+                                      "w-4 h-4 transition-colors",
+                                      isFavorite(teaching.id) 
+                                        ? "fill-destructive text-destructive" 
+                                        : "text-muted-foreground hover:text-foreground"
+                                    )} 
+                                  />
+                                </Button>
+                                {isAdmin && (
+                                  <Button variant="outline" size="sm" className="gap-1" onClick={() => handleEdit(teaching)}>
+                                    <Edit className="w-3 h-3" />Modifier
+                                  </Button>
+                                )}
+                                <Link to={`/teachings/${teaching.id}`}><Button variant="outline" size="sm" className="gap-1"><Eye className="w-3 h-3" />Voir</Button></Link>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                </div>
-              </div>
-            ))
+                  </section>
+                );
+              });
+            })()
           )}
         </div>
 
