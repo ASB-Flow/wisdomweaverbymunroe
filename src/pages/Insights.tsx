@@ -25,7 +25,7 @@ export default function Insights() {
         subtitle="Parcourez et gérez les extraits de contenu"
       />
       
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         {/* Filters */}
         <div className="flex items-center gap-4 mb-6 flex-wrap">
           <Button 

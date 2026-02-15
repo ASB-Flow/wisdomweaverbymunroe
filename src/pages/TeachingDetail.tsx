@@ -306,7 +306,7 @@ Square format (1:1) for Instagram.`
                 </a>
               )}
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap w-full md:w-auto">
               {isAdmin && (
                 <>
                   <Button 
@@ -348,7 +348,7 @@ Square format (1:1) for Instagram.`
 
           {/* Stats - Admin only */}
           {isAdmin && (
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
+            <div className="grid grid-cols-3 gap-2 md:gap-4 mt-6 pt-6 border-t border-border">
               <div className="text-center">
                 <p className="text-2xl font-bold text-foreground">{teaching.insights.length || contentSections.length}</p>
                 <p className="text-sm text-muted-foreground">Sections</p>
@@ -380,7 +380,7 @@ Square format (1:1) for Instagram.`
                 return (
                   <div 
                     key={insight.id}
-                    className="bg-card rounded-xl border border-border p-6"
+                    className="bg-card rounded-xl border border-border p-4 md:p-6"
                   >
                       <div className="flex items-start justify-between gap-4 mb-4">
                         <div className="flex items-center gap-3">
@@ -429,7 +429,7 @@ Square format (1:1) for Instagram.`
               })
             ) : (
               // Display parsed content for AI-generated teachings
-              <div className="bg-card rounded-xl border border-border p-6">
+              <div className="bg-card rounded-xl border border-border p-4 md:p-6">
                 <div className="prose prose-sm max-w-none">
                   {(() => {
                     // Try to parse JSON content if it looks like JSON
@@ -577,8 +577,8 @@ Square format (1:1) for Instagram.`
 
             {/* Visual Concepts Section */}
             {teaching.visualConcepts && teaching.visualConcepts.length > 0 && (
-              <div className="bg-card rounded-xl border border-border p-6">
-                <h3 className="font-display text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+              <div className="bg-card rounded-xl border border-border p-4 md:p-6">
+                <h3 className="font-display text-lg font-semibold text-foreground mb-4 md:mb-6 flex items-center gap-2">
                   <Eye className="w-5 h-5 text-accent" />
                   Concepts visuels
                 </h3>
@@ -592,12 +592,12 @@ Square format (1:1) for Instagram.`
 
             {/* Practical Tips Section */}
             {teaching.practicalTips && teaching.practicalTips.length > 0 && (
-              <div className="bg-card rounded-xl border border-border p-6">
-                <h3 className="font-display text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+              <div className="bg-card rounded-xl border border-border p-4 md:p-6">
+                <h3 className="font-display text-lg font-semibold text-foreground mb-4 md:mb-6 flex items-center gap-2">
                   <Lightbulb className="w-5 h-5 text-yellow-500" />
                   Conseils pratiques
                 </h3>
-                <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {teaching.practicalTips.map((tip, idx) => (
                     <PracticalTipCard key={idx} tip={tip} index={idx} />
                   ))}
@@ -607,8 +607,8 @@ Square format (1:1) for Instagram.`
 
             {/* Citations Section */}
             {teaching.citations && teaching.citations.length > 0 && (
-              <div className="bg-card rounded-xl border border-border p-6">
-                <h3 className="font-display text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+              <div className="bg-card rounded-xl border border-border p-4 md:p-6">
+                <h3 className="font-display text-lg font-semibold text-foreground mb-4 md:mb-6 flex items-center gap-2">
                   <Quote className="w-5 h-5 text-accent" />
                   Citations marquantes
                   {isAdmin && (
@@ -632,12 +632,12 @@ Square format (1:1) for Instagram.`
 
             {/* Principles Section */}
             {teaching.principles && teaching.principles.length > 0 && (
-              <div className="bg-card rounded-xl border border-border p-6">
-                <h3 className="font-display text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+              <div className="bg-card rounded-xl border border-border p-4 md:p-6">
+                <h3 className="font-display text-lg font-semibold text-foreground mb-4 md:mb-6 flex items-center gap-2">
                   <Gem className="w-5 h-5 text-gold" />
                   Principes fondamentaux
                 </h3>
-                <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {teaching.principles.map((principle, idx) => (
                     <PrincipleCard key={idx} principle={principle} index={idx} />
                   ))}
