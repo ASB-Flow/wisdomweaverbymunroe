@@ -1,4 +1,5 @@
 import { Principle } from '@/lib/teachings-store';
+import { renderInlineMarkdown } from '@/lib/markdown-utils';
 import { Gem, Info } from 'lucide-react';
 
 interface PrincipleCardProps {
@@ -15,15 +16,15 @@ export function PrincipleCard({ principle, index }: PrincipleCardProps) {
         </div>
         <div className="flex-1">
           <h4 className="font-display font-bold text-foreground mb-2">
-            {principle.name}
+            {renderInlineMarkdown(principle.name)}
           </h4>
           <p className="text-sm text-foreground/80 mb-3">
-            {principle.definition}
+            {renderInlineMarkdown(principle.definition)}
           </p>
           <div className="flex items-start gap-2 p-2 bg-white/50 rounded-lg">
             <Info className="w-4 h-4 text-gold-dark flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
-              <strong>Importance:</strong> {principle.importance}
+              <strong>Importance:</strong> {renderInlineMarkdown(principle.importance)}
             </p>
           </div>
         </div>

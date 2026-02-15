@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Download, Image, Loader2, Copy, Check, Palette, Pencil, RotateCcw, Quote } from 'lucide-react';
+import { renderInlineMarkdown } from '@/lib/markdown-utils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -218,7 +219,7 @@ export function CitationCard({ citation, isAdmin, index }: CitationCardProps) {
             <div className="p-3 rounded-lg bg-muted/50 border-l-2 border-gold/40">
               <p className="text-sm text-muted-foreground leading-relaxed">
                 <span className="font-medium text-foreground/80">💡 Explication :</span>{' '}
-                {citationContext}
+                {renderInlineMarkdown(citationContext)}
               </p>
             </div>
           </div>
