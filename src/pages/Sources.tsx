@@ -1,7 +1,7 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Header } from '@/components/layout/Header';
 import { SourceCard } from '@/components/sources/SourceCard';
-import { sources as seedSources } from '@/lib/seed-data';
+
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -132,20 +132,16 @@ export default function Sources() {
     setIsLoading(false);
   };
 
-  // Combine DB sources with seed data for display
-  const allSources: import('@/lib/seed-data').Source[] = [
-    ...sources.map(s => ({
-      id: s.id,
-      title: s.title,
-      url: s.url,
-      speaker: s.speaker,
-      publishedAt: s.published_at ? new Date(s.published_at) : new Date(),
-      durationSeconds: s.duration_seconds || 0,
-      thumbnailUrl: s.thumbnail_url || `https://img.youtube.com/vi/${s.youtube_id}/maxresdefault.jpg`,
-      platform: s.platform as 'youtube' | 'audio' | 'doc',
-    })),
-    ...seedSources
-  ];
+  const allSources = sources.map(s => ({
+    id: s.id,
+    title: s.title,
+    url: s.url,
+    speaker: s.speaker || 'Inconnu',
+    publishedAt: s.published_at ? new Date(s.published_at) : new Date(),
+    durationSeconds: s.duration_seconds || 0,
+    thumbnailUrl: s.thumbnail_url || `https://img.youtube.com/vi/${s.youtube_id}/maxresdefault.jpg`,
+    platform: (s.platform || 'youtube') as 'youtube' | 'audio' | 'doc',
+  }));
 
   return (
     <MainLayout>

@@ -1,33 +1,28 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Header } from '@/components/layout/Header';
 import { StatCard } from '@/components/dashboard/StatCard';
-import { InsightCard } from '@/components/insights/InsightCard';
-import { PostPreview } from '@/components/posts/PostPreview';
-import { SourceCard } from '@/components/sources/SourceCard';
 import { 
-  Video, 
-  Lightbulb, 
-  FileText, 
-  Calendar,
-  ArrowRight,
   MessageCircle,
   Heart,
   Eye,
-  BookOpen
+  BookOpen,
+  ArrowRight,
 } from 'lucide-react';
-import { getStats, insights, posts, sources } from '@/lib/seed-data';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useStats } from '@/hooks/useStats';
-import { useTeachingsStore } from '@/lib/teachings-store';
+import { useTeachings, themes } from '@/hooks/useTeachings';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 export default function Dashboard() {
-  const stats = getStats();
   const { stats: dashboardStats, loading } = useStats();
-  const { teachings } = useTeachingsStore();
-  const recentInsights = insights.slice(0, 3);
-  const recentPosts = posts.filter(p => p.status !== 'draft').slice(0, 2);
-  const recentSources = sources.slice(0, 2);
+  const { teachings } = useTeachings();
+
+  const recentTeachings = teachings.slice(0, 4);
+
+  const getThemeLabel = (themeId: string) =>
+    themes.find(t => t.id === themeId)?.label || themeId;
 
   return (
     <MainLayout>
@@ -64,65 +59,38 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Recent Insights */}
-          <div className="lg:col-span-2 animate-slide-up stagger-1">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-xl font-semibold text-foreground">
-                Insights récents
-              </h2>
-              <Link to="/insights">
-                <Button variant="ghost" size="sm" className="gap-1">
-                  Voir tout <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
-            <div className="grid gap-4">
-              {recentInsights.map((insight) => (
-                <InsightCard key={insight.id} insight={insight} />
-              ))}
-            </div>
+        {/* Recent Teachings */}
+        <div className="animate-slide-up stagger-1">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-xl font-semibold text-foreground">
+              Enseignements récents
+            </h2>
+            <Link to="/teachings">
+              <Button variant="ghost" size="sm" className="gap-1">
+                Voir tout <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
-
-          {/* Sidebar */}
-          <div className="space-y-8 animate-slide-up stagger-2">
-            {/* Upcoming Posts */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-display text-xl font-semibold text-foreground">
-                  Posts à venir
-                </h2>
-                <Link to="/calendar">
-                  <Button variant="ghost" size="sm" className="gap-1">
-                    Calendrier <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-              </div>
-              <div className="space-y-3">
-                {recentPosts.map((post) => (
-                  <PostPreview key={post.id} post={post} />
-                ))}
-              </div>
-            </div>
-
-            {/* Recent Sources */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-display text-xl font-semibold text-foreground">
-                  Sources récentes
-                </h2>
-                <Link to="/sources">
-                  <Button variant="ghost" size="sm" className="gap-1">
-                    Voir tout <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-              </div>
-              <div className="space-y-3">
-                {recentSources.map((source) => (
-                  <SourceCard key={source.id} source={source} />
-                ))}
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {recentTeachings.map((teaching) => (
+              <Link key={teaching.id} to={`/teachings/${teaching.id}`}>
+                <Card className="hover:shadow-md transition-all duration-300 h-full group">
+                  <CardHeader className="pb-2">
+                    <Badge variant="outline" className="w-fit mb-2">
+                      {getThemeLabel(teaching.theme)}
+                    </Badge>
+                    <CardTitle className="text-base group-hover:text-primary transition-colors">
+                      {teaching.titleFr}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {teaching.contentFr.substring(0, 100)}...
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
           </div>
         </div>
       </div>

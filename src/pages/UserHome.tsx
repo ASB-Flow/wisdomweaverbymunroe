@@ -4,40 +4,42 @@ import { Header } from '@/components/layout/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Lightbulb, Heart, ArrowRight, Sparkles } from 'lucide-react';
-import { useTeachingsStore, themes } from '@/lib/teachings-store';
+import { BookOpen, Heart, ArrowRight, Sparkles, Quote } from 'lucide-react';
+import { useTeachings, themes } from '@/hooks/useTeachings';
 import { useFavorites } from '@/hooks/useFavorites';
-import { insights } from '@/lib/seed-data';
 import { cn } from '@/lib/utils';
 
 export default function UserHome() {
-  const { teachings } = useTeachingsStore();
+  const { teachings } = useTeachings();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
 
-  // Get latest teachings (published first)
-  const latestTeachings = [...teachings]
-    .sort((a, b) => {
-      if (a.status === 'published' && b.status !== 'published') return -1;
-      if (b.status === 'published' && a.status !== 'published') return 1;
-      return 0;
+  // Only published teachings for regular users
+  const publishedTeachings = teachings.filter(t => t.status === 'published');
+
+  const latestTeachings = publishedTeachings.slice(0, 4);
+  const favoriteTeachings = publishedTeachings.filter(t => favorites.includes(t.id));
+
+  // Extract featured citations from teachings
+  const featuredCitations = teachings
+    .flatMap(t => {
+      const citations = t.citations || [];
+      return citations.map(c => ({
+        text: typeof c === 'string' ? c : (c as any).text,
+        teachingId: t.id,
+        teachingTitle: t.titleFr,
+        theme: t.theme,
+      }));
     })
-    .slice(0, 4);
+    .slice(0, 3);
 
-  // Get featured insights
-  const featuredInsights = insights.slice(0, 3);
-
-  // Get favorite teachings
-  const favoriteTeachings = teachings.filter(t => favorites.includes(t.id));
-
-  const getThemeLabel = (themeId: string) => {
-    return themes.find(t => t.id === themeId)?.label || themeId;
-  };
+  const getThemeLabel = (themeId: string) =>
+    themes.find(t => t.id === themeId)?.label || themeId;
 
   return (
     <MainLayout>
       <Header 
         title="Bienvenue" 
-        subtitle="Découvrez les enseignements et insights de Myles Munroe"
+        subtitle="Découvrez les enseignements et citations de Myles Munroe"
       />
 
       <div className="p-4 md:p-6 space-y-8">
@@ -188,44 +190,42 @@ export default function UserHome() {
           </div>
         </section>
 
-        {/* Featured Insights */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-amber-500" />
-              <h2 className="text-xl font-semibold text-foreground">Insights en vedette</h2>
-            </div>
-            <Link to="/insights">
-              <Button variant="ghost" size="sm">
-                Voir tout <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {featuredInsights.map((insight) => (
-              <Link key={insight.id} to={`/insights/${insight.id}`}>
-                <Card className="hover:shadow-md transition-all duration-300 h-full">
-                  <CardHeader className="pb-2">
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {insight.tags.slice(0, 2).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <CardTitle className="text-base">{insight.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <blockquote className="text-sm text-muted-foreground italic border-l-2 border-primary/30 pl-3">
-                      "{insight.citationText.substring(0, 100)}..."
-                    </blockquote>
-                  </CardContent>
-                </Card>
+        {/* Featured Citations */}
+        {featuredCitations.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Quote className="w-5 h-5 text-amber-500" />
+                <h2 className="text-xl font-semibold text-foreground">Citations en vedette</h2>
+              </div>
+              <Link to="/citations">
+                <Button variant="ghost" size="sm">
+                  Voir tout <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
               </Link>
-            ))}
-          </div>
-        </section>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {featuredCitations.map((citation, idx) => (
+                <Link key={idx} to={`/teachings/${citation.teachingId}`}>
+                  <Card className="hover:shadow-md transition-all duration-300 h-full">
+                    <CardHeader className="pb-2">
+                      <Badge variant="secondary" className="w-fit mb-2 text-xs">
+                        {getThemeLabel(citation.theme)}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground">{citation.teachingTitle}</p>
+                    </CardHeader>
+                    <CardContent>
+                      <blockquote className="text-sm text-muted-foreground italic border-l-2 border-primary/30 pl-3">
+                        "{citation.text?.substring(0, 120)}..."
+                      </blockquote>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </MainLayout>
   );
