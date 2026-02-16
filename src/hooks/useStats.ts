@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useTeachingsStore } from '@/lib/teachings-store';
 
 export interface DashboardStats {
   totalTeachings: number;
@@ -25,12 +24,16 @@ export const useStats = () => {
     },
   });
   const [loading, setLoading] = useState(true);
-  const { teachings } = useTeachingsStore();
 
   const fetchStats = async () => {
     setLoading(true);
 
     try {
+      // Fetch teachings count
+      const { count: teachingsCount } = await supabase
+        .from('teachings')
+        .select('*', { count: 'exact', head: true });
+
       // Fetch comments count
       const { count: commentsCount } = await supabase
         .from('comments')
@@ -57,10 +60,10 @@ export const useStats = () => {
         .gte('created_at', sevenDaysAgo.toISOString());
 
       setStats({
-        totalTeachings: teachings.filter(t => t.status === 'published').length,
+        totalTeachings: teachingsCount || 0,
         totalComments: commentsCount || 0,
         totalFavorites: favoritesCount || 0,
-        totalViews: teachings.length * 12, // Simulated views
+        totalViews: (teachingsCount || 0) * 12,
         recentActivity: {
           comments: recentCommentsCount || 0,
           favorites: recentFavoritesCount || 0,
@@ -75,7 +78,7 @@ export const useStats = () => {
 
   useEffect(() => {
     fetchStats();
-  }, [teachings.length]);
+  }, []);
 
   return { stats, loading, refetch: fetchStats };
 };
