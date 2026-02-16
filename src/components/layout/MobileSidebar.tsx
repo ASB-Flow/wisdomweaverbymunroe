@@ -23,7 +23,7 @@ import { useState } from 'react';
 const userNavItems = [
   { icon: Home, label: 'Accueil', path: '/home' },
   { icon: BookOpen, label: 'Enseignements', path: '/teachings' },
-  { icon: Lightbulb, label: 'Insights', path: '/insights' },
+  { icon: Lightbulb, label: 'Citations', path: '/citations' },
 ];
 
 const adminNavItems = [

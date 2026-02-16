@@ -11,8 +11,7 @@ import Index from "./pages/Index";
 import UserHome from "./pages/UserHome";
 import Sources from "./pages/Sources";
 import SourceDetail from "./pages/SourceDetail";
-import Insights from "./pages/Insights";
-import InsightDetail from "./pages/InsightDetail";
+import Citations from "./pages/Citations";
 import Teachings from "./pages/Teachings";
 import TeachingDetail from "./pages/TeachingDetail";
 import ContentCalendar from "./pages/ContentCalendar";
@@ -48,14 +47,9 @@ const App = () => (
                 <TeachingDetail />
               </ProtectedRoute>
             } />
-            <Route path="/insights" element={
+            <Route path="/citations" element={
               <ProtectedRoute>
-                <Insights />
-              </ProtectedRoute>
-            } />
-            <Route path="/insights/:id" element={
-              <ProtectedRoute>
-                <InsightDetail />
+                <Citations />
               </ProtectedRoute>
             } />
             
