@@ -56,6 +56,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { renderInlineMarkdown } from '@/lib/markdown-utils';
+import jsPDF from 'jspdf';
 
 export default function TeachingDetail() {
   const { id } = useParams<{ id: string }>();
