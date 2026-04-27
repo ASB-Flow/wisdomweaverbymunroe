@@ -56,6 +56,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { renderInlineMarkdown } from '@/lib/markdown-utils';
+import jsPDF from 'jspdf';
 
 export default function TeachingDetail() {
   const { id } = useParams<{ id: string }>();
@@ -152,16 +153,150 @@ export default function TeachingDetail() {
   };
 
   const handleExportPDF = () => {
-    toast({
-      title: "Export PDF",
-      description: "Le fichier PDF sera téléchargé dans quelques instants...",
-    });
-    setTimeout(() => {
+    try {
+      toast({
+        title: "Export PDF",
+        description: "Génération du fichier PDF en cours...",
+      });
+
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 18;
+      const contentWidth = pageWidth - margin * 2;
+      let y = margin;
+
+      const ensureSpace = (needed: number) => {
+        if (y + needed > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+      };
+
+      const writeText = (
+        text: string,
+        opts: { size?: number; style?: 'normal' | 'bold' | 'italic'; color?: [number, number, number]; gap?: number } = {}
+      ) => {
+        const { size = 11, style = 'normal', color = [30, 30, 30], gap = 2 } = opts;
+        doc.setFont('helvetica', style);
+        doc.setFontSize(size);
+        doc.setTextColor(color[0], color[1], color[2]);
+        const lines = doc.splitTextToSize(text, contentWidth);
+        const lineHeight = size * 0.45;
+        for (const line of lines) {
+          ensureSpace(lineHeight);
+          doc.text(line, margin, y);
+          y += lineHeight;
+        }
+        y += gap;
+      };
+
+      const drawDivider = () => {
+        ensureSpace(6);
+        doc.setDrawColor(200, 170, 80);
+        doc.setLineWidth(0.4);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 5;
+      };
+
+      // Header band
+      doc.setFillColor(20, 30, 55);
+      doc.rect(0, 0, pageWidth, 28, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(212, 175, 55);
+      doc.text('MYLES MUNROE — ENSEIGNEMENT', margin, 12);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(220, 220, 220);
+      doc.text(`Thème : ${theme.label}`, margin, 20);
+      y = 38;
+
+      // Title
+      writeText(teaching.titleFr, { size: 20, style: 'bold', color: [20, 30, 55], gap: 4 });
+
+      // Meta
+      const metaParts: string[] = [];
+      if (teaching.youtubeUrl) metaParts.push('Source : vidéo YouTube');
+      if (uniqueSources.length) metaParts.push(`${uniqueSources.length} source(s)`);
+      if (teaching.insights?.length) metaParts.push(`${teaching.insights.length} section(s)`);
+      if (metaParts.length) {
+        writeText(metaParts.join(' • '), { size: 9, style: 'italic', color: [120, 120, 120], gap: 4 });
+      }
+      drawDivider();
+
+      // Body
+      const stripMd = (s: string) =>
+        s
+          .replace(/[#>*_`]/g, '')
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+          .replace(/\r/g, '')
+          .trim();
+
+      if (teaching.insights && teaching.insights.length > 0) {
+        teaching.insights.forEach((insight: any, idx: number) => {
+          writeText(`${idx + 1}. ${insight.title}`, {
+            size: 14,
+            style: 'bold',
+            color: [20, 30, 55],
+            gap: 2,
+          });
+          if (insight.content) {
+            writeText(stripMd(insight.content), { size: 11, gap: 4 });
+          }
+          if (insight.quote) {
+            writeText(`« ${stripMd(insight.quote)} »`, {
+              size: 11,
+              style: 'italic',
+              color: [120, 90, 20],
+              gap: 4,
+            });
+          }
+          drawDivider();
+        });
+      } else {
+        contentSections.forEach((section) => {
+          writeText(stripMd(section), { size: 11, gap: 4 });
+        });
+      }
+
+      // Footer on each page
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(
+          `Page ${i} / ${pageCount} — Généré depuis la plateforme d'enseignements Myles Munroe`,
+          pageWidth / 2,
+          pageHeight - 8,
+          { align: 'center' }
+        );
+      }
+
+      const safeTitle = teaching.titleFr
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 60);
+
+      doc.save(`enseignement-${safeTitle || teaching.id}.pdf`);
+
       toast({
         title: "PDF prêt !",
         description: "Le fichier a été téléchargé.",
       });
-    }, 2000);
+    } catch (error) {
+      console.error('Erreur export PDF :', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer le PDF.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCopyLink = () => {
