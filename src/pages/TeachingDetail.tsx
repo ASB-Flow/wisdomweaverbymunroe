@@ -62,7 +62,7 @@ export default function TeachingDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { getTeachingById, updateTeaching, deleteTeaching, isLoading } = useTeachings();
   
   const teaching = getTeachingById(id || '');
