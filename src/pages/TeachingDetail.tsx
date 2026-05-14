@@ -426,7 +426,7 @@ Square format (1:1) for Instagram.`
                 {teaching.youtubeUrl ? (
                   <>Enseignement généré à partir d'une vidéo YouTube</>
                 ) : (
-                  <>Compilation des enseignements de Enseignements sur le thème de {theme.label.toLowerCase()}, 
+                  <>Compilation des enseignements sur le thème de {theme.label.toLowerCase()}, 
                   extraits de {uniqueSources.length} vidéos différentes.</>
                 )}
               </p>
