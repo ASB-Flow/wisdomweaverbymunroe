@@ -58,7 +58,7 @@ export function Sidebar() {
             <h1 className="font-display text-lg font-semibold text-sidebar-foreground">
               Teachings Hub
             </h1>
-            <p className="text-xs text-sidebar-foreground/60">Myles Munroe</p>
+            <p className="text-xs text-sidebar-foreground/60">Enseignements</p>
           </div>
         )}
       </div>
