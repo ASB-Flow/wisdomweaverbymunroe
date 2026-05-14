@@ -120,7 +120,7 @@ export default function Landing() {
               <FeatureItem 
                 icon={<Video className="w-5 h-5" />}
                 title="Enseignements en vidéo"
-                description="Accédez aux enseignements originaux de Myles Munroe avec des synthèses claires et structurées."
+                description="Accédez aux enseignements originaux avec des synthèses claires et structurées."
               />
               <FeatureItem 
                 icon={<Sparkles className="w-5 h-5" />}
@@ -148,17 +148,6 @@ export default function Landing() {
               <img src={createImg} alt="Création de contenu" className="w-full h-64 md:h-80 object-cover" />
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Citation Highlight */}
-      <section className="py-16 bg-primary">
-        <div className="container mx-auto px-6 text-center">
-          <Quote className="w-10 h-10 text-accent mx-auto mb-6" />
-          <blockquote className="font-display text-2xl md:text-3xl text-primary-foreground/90 italic max-w-3xl mx-auto leading-relaxed mb-4">
-            "The greatest tragedy in life is not death, but a life without a purpose."
-          </blockquote>
-          <p className="text-accent font-medium">— Myles Munroe</p>
         </div>
       </section>
 
