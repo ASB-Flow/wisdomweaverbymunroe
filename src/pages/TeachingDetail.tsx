@@ -205,7 +205,7 @@ export default function TeachingDetail() {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(212, 175, 55);
-      doc.text('MYLES MUNROE — ENSEIGNEMENT', margin, 12);
+      doc.text('TEACHINGS HUB — ENSEIGNEMENT', margin, 12);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(220, 220, 220);
@@ -268,7 +268,7 @@ export default function TeachingDetail() {
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
         doc.text(
-          `Page ${i} / ${pageCount} — Généré depuis la plateforme d'enseignements Myles Munroe`,
+          `Page ${i} / ${pageCount} — Généré depuis la plateforme d'enseignements Enseignements`,
           pageWidth / 2,
           pageHeight - 8,
           { align: 'center' }
@@ -318,9 +318,9 @@ export default function TeachingDetail() {
         body: { 
           type: 'generate-design',
           content: citation,
-          designPrompt: designPrompt || `Create an elegant quote card for social media with this quote from Myles Munroe: "${citation}". 
+          designPrompt: designPrompt || `Create an elegant quote card for social media with this quote from Enseignements: "${citation}". 
 Style: Deep navy blue background with golden accents, subtle light rays, modern and spiritual aesthetic. 
-Include the name "Dr. Myles Munroe" at the bottom. 
+Include the name "un enseignant" at the bottom. 
 Square format (1:1) for Instagram.`
         }
       });
@@ -426,7 +426,7 @@ Square format (1:1) for Instagram.`
                 {teaching.youtubeUrl ? (
                   <>Enseignement généré à partir d'une vidéo YouTube</>
                 ) : (
-                  <>Compilation des enseignements de Myles Munroe sur le thème de {theme.label.toLowerCase()}, 
+                  <>Compilation des enseignements sur le thème de {theme.label.toLowerCase()}, 
                   extraits de {uniqueSources.length} vidéos différentes.</>
                 )}
               </p>

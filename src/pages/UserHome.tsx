@@ -61,7 +61,7 @@ export default function UserHome() {
     <MainLayout>
       <Header 
         title="Bienvenue" 
-        subtitle="Découvrez les enseignements et citations de Myles Munroe"
+        subtitle="Découvrez les enseignements et citations thématiques"
       />
 
       <div className="p-4 md:p-6 space-y-10">

@@ -225,9 +225,9 @@ export default function Teachings() {
         body: { 
           type: 'generate-design',
           content: citation,
-          designPrompt: designPrompt || `Create an elegant quote card for social media with this quote from Myles Munroe: "${citation}". 
+          designPrompt: designPrompt || `Create an elegant quote card for social media with this quote from Enseignements: "${citation}". 
 Style: Deep navy blue background with golden accents, subtle light rays, modern and spiritual aesthetic. 
-Include the name "Dr. Myles Munroe" at the bottom. 
+Include the name "un enseignant" at the bottom. 
 Square format (1:1) for Instagram.`
         }
       });
