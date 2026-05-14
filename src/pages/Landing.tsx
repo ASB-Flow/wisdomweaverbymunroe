@@ -49,7 +49,7 @@ export default function Landing() {
               <span className="text-accent">qui transforment des vies</span>
             </h1>
             <p className="text-lg md:text-xl text-primary-foreground/80 max-w-xl mb-10">
-              Accédez aux enseignements thématiques de Myles Munroe sur le leadership, la destinée et le royaume. 
+              Accédez aux enseignements thématiques sur le leadership, la destinée et le royaume.
               Une sagesse profonde pour transformer votre vie.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
