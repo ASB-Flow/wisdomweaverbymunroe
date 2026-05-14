@@ -42,11 +42,7 @@ const App = () => (
                 <Teachings />
               </ProtectedRoute>
             } />
-            <Route path="/teachings/:id" element={
-              <ProtectedRoute>
-                <TeachingDetail />
-              </ProtectedRoute>
-            } />
+            <Route path="/teachings/:id" element={<TeachingDetail />} />
             <Route path="/citations" element={
               <ProtectedRoute>
                 <Citations />
