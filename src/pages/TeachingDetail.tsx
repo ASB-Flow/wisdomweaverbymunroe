@@ -470,14 +470,6 @@ Square format (1:1) for Instagram.`
                 <Share2 className="w-4 h-4" />
                 Partager
               </Button>
-              <Button 
-                variant="gold" 
-                className="gap-2"
-                onClick={handleExportPDF}
-              >
-                <Download className="w-4 h-4" />
-                Exporter PDF
-              </Button>
             </div>
           </div>
 
