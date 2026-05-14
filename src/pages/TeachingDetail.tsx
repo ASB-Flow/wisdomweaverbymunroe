@@ -205,7 +205,7 @@ export default function TeachingDetail() {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(212, 175, 55);
-      doc.text('MYLES MUNROE — ENSEIGNEMENT', margin, 12);
+      doc.text('TEACHINGS HUB — ENSEIGNEMENT', margin, 12);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(220, 220, 220);
