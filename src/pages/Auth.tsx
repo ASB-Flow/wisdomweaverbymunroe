@@ -119,13 +119,13 @@ export default function Auth() {
             Teachings Hub
           </h1>
           <p className="text-cream/70 text-lg mb-8">
-            Espace administrateur pour gérer les enseignements de Enseignements.
+            Espace administrateur pour gérer les enseignements thématiques.
           </p>
           <div className="bg-gold/10 rounded-2xl p-6">
             <blockquote className="font-display text-lg text-cream italic">
               "Tu ne deviens pas ce que tu entends, tu deviens ce que tu as stocké."
             </blockquote>
-            <p className="text-cream/60 text-sm mt-2">— Enseignements</p>
+            
           </div>
         </div>
       </div>
