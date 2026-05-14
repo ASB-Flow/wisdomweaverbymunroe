@@ -855,6 +855,27 @@ Square format (1:1) for Instagram.`
               </div>
             )}
 
+            {/* CTA for non-authenticated users */}
+            {!user && (
+              <div className="bg-gradient-to-br from-gold/10 to-accent/5 border border-gold/20 rounded-2xl p-6 md:p-8 text-center">
+                <Sparkles className="w-8 h-8 text-gold mx-auto mb-4" />
+                <h3 className="font-display text-xl font-bold text-foreground mb-2">
+                  Vous avez aimé cet enseignement ?
+                </h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Inscrivez-vous pour accéder à plus de contenu de ce genre et rejoindre notre communauté.
+                </p>
+                <Button 
+                  variant="gold" 
+                  className="gap-2"
+                  onClick={() => navigate('/auth')}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Inscrivez-vous pour plus de contenu
+                </Button>
+              </div>
+            )}
+
             {/* Comments Section */}
             <CommentSection teachingId={teaching.id} />
           </div>
