@@ -288,7 +288,7 @@ export const posts: Post[] = [
     id: 'post-1',
     insightId: 'ins-1',
     platform: 'instagram',
-    content: '✨ Tu ne deviens pas ce que tu ENTENDS...\nTu deviens ce que tu STOCKES.\n\n📖 Le mot "méditer" dans la Bible vient de "cud" - ruminer.\n\nComme une vache qui rumine, nous devons revenir encore et encore sur la Parole jusqu\'à ce qu\'elle fasse partie de nous.\n\n💡 Ce n\'est pas l\'information qui transforme, c\'est la méditation.\n\n#Enseignements #Méditation #Transformation #Foi #Leadership',
+    content: '✨ Tu ne deviens pas ce que tu ENTENDS...\nTu deviens ce que tu STOCKES.\n\n📖 Le mot "méditer" dans la Bible vient de "cud" - ruminer.\n\nComme une vache qui rumine, nous devons revenir encore et encore sur la Parole jusqu\'à ce qu\'elle fasse partie de nous.\n\n💡 Ce n\'est pas l\'information qui transforme, c\'est la méditation.\n\n#Méditation #Transformation #Foi #Leadership',
     status: 'draft',
   },
   {
@@ -310,7 +310,7 @@ export const posts: Post[] = [
     id: 'post-4',
     insightId: 'ins-4',
     platform: 'instagram',
-    content: '👑 BOSS vs LEADER\n\nLe boss dit "Allez!"\nLe leader dit "Allons-y!"\n\nLe boss crée des suiveurs.\nLe vrai leader crée d\'AUTRES LEADERS.\n\n"Le vrai leadership est serviteur, pas dominateur."\n— Enseignements\n\nQuel type de leader voulez-vous devenir?\n\n#Leadership #LeadershipDevelopment #Inspiration #GrowthMindset',
+    content: '👑 BOSS vs LEADER\n\nLe boss dit "Allez!"\nLe leader dit "Allons-y!"\n\nLe boss crée des suiveurs.\nLe vrai leader crée d\'AUTRES LEADERS.\n\n"Le vrai leadership est serviteur, pas dominateur."\n\nQuel type de leader voulez-vous devenir?\n\n#Leadership #LeadershipDevelopment #Inspiration #GrowthMindset',
     status: 'published',
     publishedAt: new Date('2024-12-01T14:30:00'),
   },
