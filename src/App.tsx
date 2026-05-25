@@ -15,6 +15,7 @@ import Citations from "./pages/Citations";
 import Teachings from "./pages/Teachings";
 import TeachingDetail from "./pages/TeachingDetail";
 import ContentCalendar from "./pages/ContentCalendar";
+import Compose from "./pages/Compose";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -68,6 +69,11 @@ const App = () => (
             <Route path="/calendar" element={
               <ProtectedRoute requireAdmin>
                 <ContentCalendar />
+              </ProtectedRoute>
+            } />
+            <Route path="/compose" element={
+              <ProtectedRoute requireAdmin>
+                <Compose />
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
