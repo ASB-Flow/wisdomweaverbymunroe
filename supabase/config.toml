@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.generate-teaching]
 verify_jwt = true
+
+[functions.compose-teaching]
+verify_jwt = true

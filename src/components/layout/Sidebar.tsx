@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Home
+  Home,
+  Wand2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -26,6 +27,7 @@ const userNavItems = [
 const adminNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Video, label: 'Sources', path: '/sources' },
+  { icon: Wand2, label: 'Rédaction', path: '/compose' },
   { icon: Calendar, label: 'Calendrier', path: '/calendar' },
   { icon: Settings, label: 'Paramètres', path: '/settings' },
 ];
