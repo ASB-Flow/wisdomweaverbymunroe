@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "sdk_version": "0.23.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://ssannwblkuafdeygtjiu.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "teachings-hub-mcp",
+      "version": "0.1.0",
+      "title": "Teachings Hub MCP"
+    },
+    "tools": [
+      {
+        "name": "list_teachings",
+        "title": "Lister les enseignements",
+        "description": "Liste les enseignements publiés (titre, thème, id, date). Filtre optionnel par thème ou recherche textuelle sur le titre.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "theme": {
+              "type": "string",
+              "description": "Filtrer par thème (ex: meditation, leadership, purpose)."
+            },
+            "search": {
+              "type": "string",
+              "description": "Recherche textuelle dans le titre."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Nombre max de résultats (défaut 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_teaching",
+        "title": "Lire un enseignement",
+        "description": "Récupère un enseignement complet par id : contenu, principes, étapes d'application, citations, histoires, concepts visuels.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identifiant UUID de l'enseignement."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_favorites",
+        "title": "Mes favoris",
+        "description": "Liste les enseignements ajoutés en favoris par l'utilisateur connecté.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "toggle_favorite",
+        "title": "Ajouter/retirer un favori",
+        "description": "Ajoute ou retire un enseignement des favoris de l'utilisateur connecté.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "teaching_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID de l'enseignement à basculer."
+            }
+          },
+          "required": [
+            "teaching_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
