@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +19,7 @@ const signupSchema = loginSchema.extend({
 
 export default function Auth() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { user, signIn, signUp, isLoading: authLoading } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
@@ -29,12 +30,16 @@ export default function Auth() {
     displayName: '',
   });
 
+  // Same-origin relative path only (validated), otherwise fall back to /home.
+  const rawNext = searchParams.get('next');
+  const nextPath = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/home';
+
   // Redirect if already authenticated
   useEffect(() => {
     if (user && !authLoading) {
-      navigate('/home');
+      navigate(nextPath);
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, nextPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +79,7 @@ export default function Auth() {
           title: "Connexion réussie",
           description: "Bienvenue !",
         });
-        navigate('/home');
+        navigate(nextPath);
       }
     } else {
       const { error } = await signUp(formData.email, formData.password, formData.displayName);
@@ -92,7 +97,7 @@ export default function Auth() {
           title: "Inscription réussie",
           description: "Votre compte a été créé. Vous êtes maintenant connecté.",
         });
-        navigate('/home');
+        navigate(nextPath);
       }
     }
 

@@ -18,6 +18,7 @@ import ContentCalendar from "./pages/ContentCalendar";
 import Compose from "./pages/Compose";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import OAuthConsent from "./pages/OAuthConsent";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             {/* Page d'accueil personnalisée pour utilisateurs authentifiés */}
             <Route path="/home" element={
               <ProtectedRoute>
