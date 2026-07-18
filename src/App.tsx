@@ -19,6 +19,7 @@ import Compose from "./pages/Compose";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import OAuthConsent from "./pages/OAuthConsent";
+import Mentor from "./pages/Mentor";
 
 const queryClient = new QueryClient();
 
