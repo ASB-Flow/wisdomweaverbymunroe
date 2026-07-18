@@ -9,7 +9,8 @@ import {
   LogOut,
   Home,
   Menu,
-  Wand2
+  Wand2,
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,6 +32,7 @@ const adminNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Video, label: 'Sources', path: '/sources' },
   { icon: Wand2, label: 'Rédaction', path: '/compose' },
+  { icon: Sparkles, label: 'Mentor', path: '/mentor' },
   { icon: Calendar, label: 'Calendrier', path: '/calendar' },
   { icon: Settings, label: 'Paramètres', path: '/settings' },
 ];

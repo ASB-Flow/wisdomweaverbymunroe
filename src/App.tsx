@@ -19,6 +19,7 @@ import Compose from "./pages/Compose";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import OAuthConsent from "./pages/OAuthConsent";
+import Mentor from "./pages/Mentor";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,16 @@ const App = () => (
             <Route path="/settings" element={
               <ProtectedRoute requireAdmin>
                 <Settings />
+              </ProtectedRoute>
+            } />
+            <Route path="/mentor" element={
+              <ProtectedRoute requireAdmin>
+                <Mentor />
+              </ProtectedRoute>
+            } />
+            <Route path="/mentor/:threadId" element={
+              <ProtectedRoute requireAdmin>
+                <Mentor />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
