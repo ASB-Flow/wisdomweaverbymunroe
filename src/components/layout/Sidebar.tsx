@@ -10,7 +10,8 @@ import {
   ChevronRight,
   LogOut,
   Home,
-  Wand2
+  Wand2,
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
