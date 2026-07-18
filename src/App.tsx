@@ -84,6 +84,16 @@ const App = () => (
                 <Settings />
               </ProtectedRoute>
             } />
+            <Route path="/mentor" element={
+              <ProtectedRoute requireAdmin>
+                <Mentor />
+              </ProtectedRoute>
+            } />
+            <Route path="/mentor/:threadId" element={
+              <ProtectedRoute requireAdmin>
+                <Mentor />
+              </ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
