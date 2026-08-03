@@ -20,6 +20,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import OAuthConsent from "./pages/OAuthConsent";
 import Mentor from "./pages/Mentor";
+import InstagramStudio from "./pages/InstagramStudio";
 
 const queryClient = new QueryClient();
 
@@ -79,11 +80,17 @@ const App = () => (
                 <Compose />
               </ProtectedRoute>
             } />
+            <Route path="/instagram" element={
+              <ProtectedRoute requireAdmin>
+                <InstagramStudio />
+              </ProtectedRoute>
+            } />
             <Route path="/settings" element={
               <ProtectedRoute requireAdmin>
                 <Settings />
               </ProtectedRoute>
             } />
+
             <Route path="/mentor" element={
               <ProtectedRoute requireAdmin>
                 <Mentor />

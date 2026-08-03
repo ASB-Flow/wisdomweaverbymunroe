@@ -11,7 +11,8 @@ import {
   LogOut,
   Home,
   Wand2,
-  Sparkles
+  Sparkles,
+  Instagram,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -30,6 +31,7 @@ const adminNavItems = [
   { icon: Video, label: 'Sources', path: '/sources' },
   { icon: Wand2, label: 'Rédaction', path: '/compose' },
   { icon: Sparkles, label: 'Mentor', path: '/mentor' },
+  { icon: Instagram, label: 'Studio Instagram', path: '/instagram' },
   { icon: Calendar, label: 'Calendrier', path: '/calendar' },
   { icon: Settings, label: 'Paramètres', path: '/settings' },
 ];
