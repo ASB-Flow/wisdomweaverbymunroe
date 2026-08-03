@@ -80,11 +80,17 @@ const App = () => (
                 <Compose />
               </ProtectedRoute>
             } />
+            <Route path="/instagram" element={
+              <ProtectedRoute requireAdmin>
+                <InstagramStudio />
+              </ProtectedRoute>
+            } />
             <Route path="/settings" element={
               <ProtectedRoute requireAdmin>
                 <Settings />
               </ProtectedRoute>
             } />
+
             <Route path="/mentor" element={
               <ProtectedRoute requireAdmin>
                 <Mentor />
