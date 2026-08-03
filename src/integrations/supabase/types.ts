@@ -62,6 +62,39 @@ export type Database = {
         }
         Relationships: []
       }
+      instagram_posts: {
+        Row: {
+          created_at: string
+          design_style: string
+          id: string
+          slides: Json
+          theme: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          design_style?: string
+          id?: string
+          slides?: Json
+          theme?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          design_style?: string
+          id?: string
+          slides?: Json
+          theme?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mentor_messages: {
         Row: {
           content: string
