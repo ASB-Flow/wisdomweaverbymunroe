@@ -20,6 +20,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import OAuthConsent from "./pages/OAuthConsent";
 import Mentor from "./pages/Mentor";
+import InstagramStudio from "./pages/InstagramStudio";
 
 const queryClient = new QueryClient();
 
