@@ -32,6 +32,8 @@ import {
   Download,
   ImageIcon,
   FileDown,
+  Bold,
+  List,
 } from "lucide-react";
 
 interface PostRow {
@@ -456,11 +458,35 @@ export default function InstagramStudio() {
                         onChange={(e) => updateSlide(index, { heading: e.target.value })}
                         placeholder="Titre de la section"
                       />
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => applyBold(index)}
+                          title="Mettre en gras la sélection"
+                        >
+                          <Bold className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => applyBullets(index)}
+                          title="Transformer les lignes en puces"
+                        >
+                          <List className="w-4 h-4" />
+                        </Button>
+                        <span className="text-xs text-muted-foreground">
+                          **gras** · lignes commençant par « - » = puces
+                        </span>
+                      </div>
                       <Textarea
+                        ref={(el) => (bodyRefs.current[index] = el)}
                         value={slide.body}
                         onChange={(e) => updateSlide(index, { body: e.target.value })}
                         placeholder="Texte affiché sur le visuel"
-                        rows={3}
+                        rows={4}
                       />
                       <div className="flex flex-wrap gap-2">
                         <Button
