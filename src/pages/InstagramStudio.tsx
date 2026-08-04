@@ -6,7 +6,9 @@ import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import {
   DESIGN_PRESETS,
+  FORMAT_PRESETS,
   getDesign,
+  getFormat,
   StorySlideData,
 } from "@/lib/instagram-designs";
 import { StorySlide } from "@/components/instagram/StorySlide";
@@ -45,7 +47,6 @@ interface PostRow {
   updated_at: string;
 }
 
-const EXPORT_WIDTH = 1080;
 
 /** Downscale a data URL to a compact JPEG so it can be stored with the post */
 async function compressImage(dataUrl: string, maxWidth = 720): Promise<string> {
@@ -66,7 +67,18 @@ async function compressImage(dataUrl: string, maxWidth = 720): Promise<string> {
   });
 }
 
-const emptySlide = (): StorySlideData => ({ heading: "", body: "" });
+const emptySlide = (): StorySlideData => ({ kicker: "", heading: "", subtext: "", body: "" });
+
+/** Ready-to-use narrative skeleton (hook -> revelation -> action -> CTA) */
+const CAROUSEL_TEMPLATE: StorySlideData[] = [
+  { kicker: "L'accroche", heading: "", subtext: "", body: "", imageIdea: "extreme close-up of a lion eye, golden light" },
+  { kicker: "Le mythe", heading: "", subtext: "", body: "", imageIdea: "quiet cemetery at dusk, dramatic light" },
+  { kicker: "La définition", heading: "", subtext: "", body: "" },
+  { kicker: "L'analogie", heading: "", subtext: "", body: "", imageIdea: "a tiny seed and a giant mango tree, split composition" },
+  { kicker: "Le principe", heading: "", subtext: "", body: "", imageIdea: "majestic lion standing on a rock at sunrise" },
+  { kicker: "L'action", heading: "", subtext: "", body: "" },
+  { kicker: "Appel", heading: "", subtext: "", body: "", imageIdea: "silhouette of an eagle taking off over african savannah" },
+];
 
 export default function InstagramStudio() {
   const { user } = useAuth();
@@ -77,6 +89,7 @@ export default function InstagramStudio() {
   const [subject, setSubject] = useState("");
   const [slideCount, setSlideCount] = useState("5");
   const [designId, setDesignId] = useState("gold-dark");
+  const [formatId, setFormatId] = useState("portrait");
   const [slides, setSlides] = useState<StorySlideData[]>([emptySlide()]);
   const [caption, setCaption] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -88,6 +101,7 @@ export default function InstagramStudio() {
   const exportRefs = useRef<(HTMLDivElement | null)[]>([]);
   const bodyRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
   const design = getDesign(designId);
+  const format = getFormat(formatId);
 
   const loadPosts = async () => {
     const { data, error } = await supabase
@@ -182,8 +196,11 @@ export default function InstagramStudio() {
       if (Array.isArray(data?.slides) && data.slides.length) {
         setSlides(
           data.slides.map((s: StorySlideData) => ({
+            kicker: s.kicker ?? "",
             heading: s.heading ?? "",
+            subtext: s.subtext ?? "",
             body: s.body ?? "",
+            imageIdea: s.imageIdea ?? "",
           })),
         );
       }
@@ -204,7 +221,9 @@ export default function InstagramStudio() {
         body: {
           type: "generate-background",
           stylePrompt: design.prompt,
-          sectionText: `${slide.heading}. ${slide.body}`,
+          imageIdea: slide.imageIdea,
+          size: format.imageSize,
+          sectionText: `${slide.heading}. ${slide.subtext ?? ""} ${slide.body}`,
         },
       });
       if (error) throw error;
@@ -289,8 +308,8 @@ export default function InstagramStudio() {
       backgroundColor: null,
       scale: 1,
       useCORS: true,
-      width: EXPORT_WIDTH,
-      height: (EXPORT_WIDTH * 16) / 9,
+      width: format.exportWidth,
+      height: Math.round(format.exportWidth * format.ratio),
     });
     const link = document.createElement("a");
     link.download = `${(title || "story").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${index + 1}.png`;
@@ -326,7 +345,7 @@ export default function InstagramStudio() {
               Studio Instagram
             </h1>
             <p className="text-muted-foreground mt-1">
-              Créez un sujet, structurez vos sections et générez les visuels 9:16 prêts à publier.
+              Construisez un carrousel narratif (accroche → révélation → action → CTA) et générez les visuels prêts à publier.
             </p>
           </div>
           <div className="flex gap-2">
@@ -402,7 +421,7 @@ export default function InstagramStudio() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Nombre de sections</Label>
                   <Select value={slideCount} onValueChange={setSlideCount}>
@@ -425,6 +444,17 @@ export default function InstagramStudio() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2">
+                  <Label>Format</Label>
+                  <Select value={formatId} onValueChange={setFormatId}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {FORMAT_PRESETS.map((f) => (
+                        <SelectItem key={f.id} value={f.id}>{f.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="flex items-end">
                   <Button onClick={generateSections} disabled={generating} className="w-full">
                     {generating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
@@ -441,6 +471,15 @@ export default function InstagramStudio() {
                 <Button variant="outline" onClick={exportAll} disabled={exporting}>
                   {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileDown className="w-4 h-4 mr-2" />}
                   Télécharger tous les visuels
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSlides(CAROUSEL_TEMPLATE.map((s) => ({ ...s })));
+                    setSlideCount("7");
+                  }}
+                >
+                  <Sparkles className="w-4 h-4 mr-2" /> Structure carrousel (7 slides)
                 </Button>
                 <Button variant="ghost" onClick={() => setSlides((p) => [...p, emptySlide()])}>
                   <Plus className="w-4 h-4 mr-2" /> Ajouter une section
@@ -465,6 +504,7 @@ export default function InstagramStudio() {
                         <StorySlide
                           slide={slide}
                           design={design}
+                          ratio={format.ratio}
                           width={200}
                           index={index}
                           total={slides.length}
@@ -486,10 +526,22 @@ export default function InstagramStudio() {
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-2">
+                        <Input
+                          value={slide.kicker ?? ""}
+                          onChange={(e) => updateSlide(index, { kicker: e.target.value })}
+                          placeholder="Étape (ex : L'accroche)"
+                        />
+                        <Input
+                          value={slide.heading}
+                          onChange={(e) => updateSlide(index, { heading: e.target.value })}
+                          placeholder="Titre de la section"
+                        />
+                      </div>
                       <Input
-                        value={slide.heading}
-                        onChange={(e) => updateSlide(index, { heading: e.target.value })}
-                        placeholder="Titre de la section"
+                        value={slide.subtext ?? ""}
+                        onChange={(e) => updateSlide(index, { subtext: e.target.value })}
+                        placeholder="Sous-texte (chute de la phrase, une ligne)"
                       />
                       <div className="flex items-center gap-2">
                         <Button
@@ -520,6 +572,11 @@ export default function InstagramStudio() {
                         onChange={(e) => updateSlide(index, { body: e.target.value })}
                         placeholder="Texte affiché sur le visuel"
                         rows={4}
+                      />
+                      <Input
+                        value={slide.imageIdea ?? ""}
+                        onChange={(e) => updateSlide(index, { imageIdea: e.target.value })}
+                        placeholder="Idée d'image (ex : gros plan sur l'œil d'un lion)"
                       />
                       <div className="flex flex-wrap gap-2">
                         <Button
@@ -560,7 +617,8 @@ export default function InstagramStudio() {
               ref={(el) => (exportRefs.current[index] = el)}
               slide={slide}
               design={design}
-              width={EXPORT_WIDTH}
+              ratio={format.ratio}
+              width={format.exportWidth}
               index={index}
               total={slides.length}
               footer={theme || "Teachings Hub"}
