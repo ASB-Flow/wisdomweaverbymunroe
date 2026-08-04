@@ -12,7 +12,10 @@ interface Body {
   slideCount?: number;
   stylePrompt?: string;
   sectionText?: string;
+  imageIdea?: string;
+  size?: string;
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
