@@ -86,6 +86,7 @@ export default function InstagramStudio() {
   const [exporting, setExporting] = useState(false);
 
   const exportRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const bodyRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
   const design = getDesign(designId);
 
   const loadPosts = async () => {
@@ -124,6 +125,38 @@ export default function InstagramStudio() {
 
   const updateSlide = (index: number, patch: Partial<StorySlideData>) => {
     setSlides((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+  };
+
+  const applyBold = (index: number) => {
+    const el = bodyRefs.current[index];
+    if (!el) return;
+    const { selectionStart: s, selectionEnd: e, value } = el;
+    if (s === e) {
+      toast.info("Sélectionnez d'abord le texte à mettre en gras");
+      return;
+    }
+    const next = `${value.slice(0, s)}**${value.slice(s, e)}**${value.slice(e)}`;
+    updateSlide(index, { body: next });
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(s + 2, e + 2);
+    });
+  };
+
+  const applyBullets = (index: number) => {
+    const el = bodyRefs.current[index];
+    if (!el) return;
+    const { selectionStart: s, selectionEnd: e, value } = el;
+    const hasSel = s !== e;
+    const start = hasSel ? value.lastIndexOf("\n", s - 1) + 1 : 0;
+    const end = hasSel ? (value.indexOf("\n", e) === -1 ? value.length : value.indexOf("\n", e)) : value.length;
+    const block = value
+      .slice(start, end)
+      .split("\n")
+      .map((l) => (l.trim() === "" || /^\s*[-*•]\s+/.test(l) ? l : `- ${l.trim()}`))
+      .join("\n");
+    updateSlide(index, { body: value.slice(0, start) + block + value.slice(end) });
+    requestAnimationFrame(() => el.focus());
   };
 
   const generateSections = async () => {
