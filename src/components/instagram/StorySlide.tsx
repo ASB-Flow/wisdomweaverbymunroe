@@ -21,17 +21,20 @@ function renderRich(text: string, strongColor: string) {
 interface StorySlideProps {
   slide: StorySlideData;
   design: DesignPreset;
-  /** rendered width in px (height is always width * 16/9) */
+  /** rendered width in px */
   width: number;
+  /** height = width * ratio (default 16/9 story) */
+  ratio?: number;
   index: number;
   total: number;
   footer?: string;
 }
 
 export const StorySlide = forwardRef<HTMLDivElement, StorySlideProps>(
-  ({ slide, design, width, index, total, footer }, ref) => {
+  ({ slide, design, width, ratio = 16 / 9, index, total, footer }, ref) => {
     const u = width / 1080;
-    const height = (width * 16) / 9;
+    const height = width * ratio;
+    const dense = ratio < 1.2;
 
     return (
       <div
@@ -76,7 +79,7 @@ export const StorySlide = forwardRef<HTMLDivElement, StorySlideProps>(
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            padding: `${110 * u}px ${86 * u}px`,
+            padding: `${(dense ? 80 : 110) * u}px ${(dense ? 74 : 86) * u}px`,
             boxSizing: "border-box",
           }}
         >
@@ -99,14 +102,23 @@ export const StorySlide = forwardRef<HTMLDivElement, StorySlideProps>(
                 display: "inline-block",
               }}
             />
-            {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+            <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+              {slide.kicker ? ` · ${slide.kicker}` : ""}
+            </span>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: `${40 * u}px` }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: `${(dense ? 26 : 40) * u}px`,
+            }}
+          >
             <h2
               style={{
                 fontFamily: design.headingFont,
-                fontSize: `${slide.heading.length > 26 ? 82 * u : 104 * u}px`,
+                fontSize: `${(slide.heading.length > 26 ? 82 : 104) * (dense ? 0.82 : 1) * u}px`,
                 lineHeight: 1.08,
                 fontWeight: 700,
                 margin: 0,
@@ -115,6 +127,21 @@ export const StorySlide = forwardRef<HTMLDivElement, StorySlideProps>(
             >
               {slide.heading}
             </h2>
+
+            {slide.subtext && (
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: `${(dense ? 44 : 52) * u}px`,
+                  lineHeight: 1.28,
+                  fontWeight: 600,
+                  color: design.accent,
+                }}
+              >
+                {renderRich(slide.subtext, design.accent)}
+              </p>
+            )}
+
             <span
               style={{
                 width: `${120 * u}px`,
@@ -125,7 +152,7 @@ export const StorySlide = forwardRef<HTMLDivElement, StorySlideProps>(
             />
             <div
               style={{
-                fontSize: `${slide.body.length > 180 ? 38 * u : 46 * u}px`,
+                fontSize: `${(slide.body.length > 180 ? 38 : 46) * (dense ? 0.88 : 1) * u}px`,
                 lineHeight: 1.5,
                 margin: 0,
                 color: design.muted,
