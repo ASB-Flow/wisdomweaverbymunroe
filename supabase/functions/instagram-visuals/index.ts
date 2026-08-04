@@ -176,7 +176,11 @@ Réponds UNIQUEMENT en JSON valide :
         });
       }
 
-      const prompt = `Vertical 9:16 Instagram story BACKGROUND image, NO TEXT of any kind, no letters, no words, no logos.
+      const allowedSizes = ["1024x1024", "1024x1536", "1536x1024"];
+      const size = allowedSizes.includes(body.size ?? "") ? body.size! : "1024x1536";
+
+      const prompt = `Instagram BACKGROUND image, NO TEXT of any kind, no letters, no words, no logos.
+${body.imageIdea ? `Main subject: ${body.imageIdea}.` : ""}
 Style: ${stylePrompt}.
 ${body.sectionText ? `Mood inspired by this idea (do not write it): "${body.sectionText}".` : ""}
 The center of the image must stay visually calm and uncluttered so that text can be overlaid on top.
@@ -191,11 +195,12 @@ Cinematic, elegant, high-end editorial quality, subtle grain.`;
         body: JSON.stringify({
           model: "openai/gpt-image-2",
           prompt,
-          size: "1024x1536",
+          size,
           quality: "low",
           n: 1,
         }),
       });
+
 
       if (!response.ok) {
         const errorText = await response.text();
