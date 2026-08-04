@@ -1,6 +1,23 @@
 import { forwardRef } from "react";
 import { DesignPreset, StorySlideData } from "@/lib/instagram-designs";
 
+/** Renders **bold** and *italic* inside slide text */
+function renderRich(text: string, strongColor: string) {
+  return text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={i} style={{ fontWeight: 700, color: strongColor }}>
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) {
+      return <em key={i}>{part.slice(1, -1)}</em>;
+    }
+    return part;
+  });
+}
+
 interface StorySlideProps {
   slide: StorySlideData;
   design: DesignPreset;
@@ -106,17 +123,38 @@ export const StorySlide = forwardRef<HTMLDivElement, StorySlideProps>(
                 borderRadius: `${4 * u}px`,
               }}
             />
-            <p
+            <div
               style={{
                 fontSize: `${slide.body.length > 180 ? 38 * u : 46 * u}px`,
                 lineHeight: 1.5,
                 margin: 0,
                 color: design.muted,
-                whiteSpace: "pre-wrap",
+                display: "flex",
+                flexDirection: "column",
+                gap: `${14 * u}px`,
               }}
             >
-              {slide.body}
-            </p>
+              {slide.body.split("\n").map((line, i) => {
+                const bullet = /^\s*([-*•])\s+/.test(line);
+                const content = bullet ? line.replace(/^\s*([-*•])\s+/, "") : line;
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      gap: bullet ? `${18 * u}px` : 0,
+                      whiteSpace: "pre-wrap",
+                      minHeight: content ? undefined : `${20 * u}px`,
+                    }}
+                  >
+                    {bullet && (
+                      <span style={{ color: design.accent, lineHeight: 1.5 }}>•</span>
+                    )}
+                    <span style={{ flex: 1 }}>{renderRich(content, design.text)}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           <div
