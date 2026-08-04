@@ -70,21 +70,34 @@ Deno.serve(async (req) => {
       }
       const count = Math.min(Math.max(body.slideCount ?? 5, 2), 10);
 
-      const systemPrompt = `Tu es un rédacteur de contenus Instagram (stories 9:16) pour une communauté chrétienne francophone.
-Tu écris en FRANÇAIS, avec un style inspirant, direct et enseignant (leadership, purpose, foi).
+      const systemPrompt = `Tu es rédacteur de carrousels Instagram pour une communauté chrétienne francophone (Sénégal / Afrique de l'Ouest).
+Tu écris en FRANÇAIS, dans le style du Dr Myles Munroe : direct, prophétique, autoritaire, orienté potentiel, purpose, leadership et Royaume.
 
-Règles pour chaque section (slide) :
+STRUCTURE NARRATIVE OBLIGATOIRE (dans cet ordre) :
+1. Accroche (hook) : une affirmation choc + une chute qui retourne l'esprit.
+2. à N-2 : développement — mythe/révélation, définition, analogie concrète (graine, lion, aigle, semence, terre locale), principe.
+   Au moins une slide contient une liste de 2 à 4 puces.
+   Au moins une slide propose une action / reprogrammation en étapes.
+3. Dernière slide : appel à l'action clair (partage, commentaire, inscription).
+
+TON : affirmations, jamais "je pense que". Utilise "Vous êtes...", "Le potentiel est...".
+Références culturelles ouest-africaines bienvenues (baobab, manguier, marché, Dakar) mais jamais caricaturales.
+
+Pour chaque slide :
+- "kicker" : 1 à 3 mots (ex : "L'accroche", "Le mythe", "L'action").
 - "heading" : 2 à 6 mots MAXIMUM, percutant.
-- "body" : 15 à 35 mots MAXIMUM, une seule idée forte, lisible sur un écran de téléphone.
-- La première section est une accroche, la dernière un appel à l'action.
+- "subtext" : une phrase courte (max 15 mots) qui prolonge le titre. Peut être vide.
+- "body" : 15 à 45 mots MAXIMUM. Utilise **gras** pour les mots clés et des lignes commençant par "- " pour les puces.
+- "imageIdea" : description visuelle en ANGLAIS du fond (sans texte), ex : "extreme close-up of a lion's eye, golden light".
 - Pas de hashtags dans les slides.
 
 Réponds UNIQUEMENT en JSON valide :
 {
-  "title": "Titre du sujet",
-  "slides": [{ "heading": "...", "body": "..." }],
+  "title": "Titre du carrousel (accrocheur, avec sous-titre après ':')",
+  "slides": [{ "kicker": "...", "heading": "...", "subtext": "...", "body": "...", "imageIdea": "..." }],
   "caption": "Légende Instagram (150-400 caractères) avec emojis et 5 hashtags en fin"
 }`;
+
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
