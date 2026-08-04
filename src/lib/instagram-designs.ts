@@ -88,8 +88,36 @@ export const getDesign = (id: string): DesignPreset =>
   DESIGN_PRESETS.find((d) => d.id === id) ?? DESIGN_PRESETS[0];
 
 export interface StorySlideData {
+  /** small eyebrow label, e.g. "L'accroche", "02 · Le mythe" */
+  kicker?: string;
   heading: string;
+  /** short punchline displayed right under the heading */
+  subtext?: string;
   body: string;
+  /** visual idea used to guide the AI background */
+  imageIdea?: string;
   /** downscaled JPEG data URL of the AI generated background */
   image?: string;
 }
+
+export type FormatId = "story" | "portrait" | "square";
+
+export interface FormatPreset {
+  id: FormatId;
+  label: string;
+  /** height = width * ratio */
+  ratio: number;
+  exportWidth: number;
+  /** size hint sent to the image model */
+  imageSize: string;
+}
+
+export const FORMAT_PRESETS: FormatPreset[] = [
+  { id: "portrait", label: "Carrousel 4:5", ratio: 5 / 4, exportWidth: 1080, imageSize: "1024x1536" },
+  { id: "square", label: "Carrousel 1:1", ratio: 1, exportWidth: 1080, imageSize: "1024x1024" },
+  { id: "story", label: "Story 9:16", ratio: 16 / 9, exportWidth: 1080, imageSize: "1024x1536" },
+];
+
+export const getFormat = (id: string): FormatPreset =>
+  FORMAT_PRESETS.find((f) => f.id === id) ?? FORMAT_PRESETS[0];
+
