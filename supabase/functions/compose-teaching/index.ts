@@ -48,9 +48,9 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not configured");
     }
 
     const { topic, notes, theme, audience, length } = await req.json();
@@ -137,24 +137,22 @@ ${trimmedNotes ? `📚 NOTES DE RÉFÉRENCE FOURNIES (à intégrer, reformuler e
 
 Rédige maintenant un enseignement captivant qui transforme la vie du lecteur. Le résultat doit ressembler à ce que Munroe aurait écrit lui-même : prophétique, percutant, libérateur.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+          generationConfig: { temperature: 1 },
+        }),
       },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI Gateway error:", response.status, errorText);
+      console.error("Gemini API error:", response.status, errorText);
 
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Limite de requêtes atteinte. Réessayez dans un instant." }), {
@@ -162,9 +160,9 @@ Rédige maintenant un enseignement captivant qui transforme la vie du lecteur. L
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Crédits AI épuisés. Ajoutez des crédits à votre espace Lovable." }), {
-          status: 402,
+      if (response.status === 403) {
+        return new Response(JSON.stringify({ error: "Clé API Gemini invalide ou quota dépassé." }), {
+          status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -175,7 +173,7 @@ Rédige maintenant un enseignement captivant qui transforme la vie du lecteur. L
     }
 
     const aiData = await response.json();
-    const content = aiData.choices?.[0]?.message?.content ?? "";
+    const content = aiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
     let parsed;
     try {

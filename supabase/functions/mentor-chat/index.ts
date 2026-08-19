@@ -115,39 +115,42 @@ serve(async (req) => {
       content: message.trim(),
     });
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
 
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...(history ?? []).map((m: any) => ({ role: m.role, content: m.content })),
-      { role: "user", content: message.trim() },
+    // Build Gemini contents: map "assistant" -> "model"
+    const contents = [
+      ...(history ?? []).map((m: any) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      })),
+      { role: "user", parts: [{ text: message.trim() }] },
     ];
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
+    const aiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents,
+          generationConfig: { temperature: 1 },
+        }),
       },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages,
-        stream: true,
-      }),
-    });
+    );
 
     if (!aiResponse.ok || !aiResponse.body) {
       const errorText = await aiResponse.text();
-      console.error("AI Gateway error:", aiResponse.status, errorText);
+      console.error("Gemini API error:", aiResponse.status, errorText);
       if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: "Limite de requêtes atteinte." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Crédits AI épuisés." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      if (aiResponse.status === 403) {
+        return new Response(JSON.stringify({ error: "Clé API Gemini invalide ou quota dépassé." }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       return new Response(JSON.stringify({ error: "Échec de la génération" }), {
@@ -175,10 +178,10 @@ serve(async (req) => {
               const trimmed = line.trim();
               if (!trimmed.startsWith("data:")) continue;
               const data = trimmed.slice(5).trim();
-              if (data === "[DONE]") continue;
+              if (data === "[DONE]" || !data) continue;
               try {
                 const json = JSON.parse(data);
-                const delta = json.choices?.[0]?.delta?.content;
+                const delta = json?.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (delta) {
                   fullContent += delta;
                   controller.enqueue(encoder.encode(delta));
