@@ -39,6 +39,26 @@ async function fetchYouTubeMetadata(videoId: string) {
   return await response.json();
 }
 
+const TEXT_MODEL = "gemini-2.5-flash";
+const IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation";
+
+/** Extract the first inline image (base64) from a Gemini image-generation response. */
+function extractImageFromGemini(aiData: any): { b64: string; mimeType: string; text: string } | null {
+  const parts = aiData?.candidates?.[0]?.content?.parts ?? [];
+  for (const p of parts) {
+    if (p.inlineData?.data) {
+      return { b64: p.inlineData.data, mimeType: p.inlineData.mimeType || "image/png", text: "" };
+    }
+    // Some shapes use inline_data
+    if (p.inline_data?.data) {
+      return { b64: p.inline_data.data, mimeType: p.inline_data.mime_type || "image/png", text: "" };
+    }
+  }
+  // No inline image found; gather any text
+  const text = parts.map((p: any) => p.text ?? "").join("");
+  return text ? { b64: "", mimeType: "", text } : null;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -87,9 +107,9 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not configured");
     }
 
     const body: RequestBody = await req.json();
@@ -229,24 +249,22 @@ Instructions ESSENTIELLES :
 
 L'objectif est de CAPTIVER ta communauté et les INCITER à consulter chaque nouvelle partie avec impatience.`;
 
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+            generationConfig: { temperature: 1 },
+          }),
         },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-        }),
-      });
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("AI Gateway error:", response.status, errorText);
+        console.error("Gemini API error:", response.status, errorText);
         
         if (response.status === 429) {
           return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
@@ -254,9 +272,9 @@ L'objectif est de CAPTIVER ta communauté et les INCITER à consulter chaque nou
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        if (response.status === 402) {
-          return new Response(JSON.stringify({ error: "AI credits depleted. Please add credits." }), {
-            status: 402,
+        if (response.status === 403) {
+          return new Response(JSON.stringify({ error: "Clé API Gemini invalide ou quota dépassé." }), {
+            status: 403,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
@@ -268,7 +286,7 @@ L'objectif est de CAPTIVER ta communauté et les INCITER à consulter chaque nou
       }
 
       const aiData = await response.json();
-      const content = aiData.choices?.[0]?.message?.content;
+      const content = aiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
       let parsedContent;
       try {
@@ -310,20 +328,17 @@ Include space for text overlay.
 The design should evoke wisdom, leadership and spiritual depth.
 Aspect ratio 1:1 for Instagram.`;
 
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: imagePrompt }] }],
+            generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+          }),
         },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash-image-preview",
-          messages: [
-            { role: "user", content: imagePrompt },
-          ],
-          modalities: ["image", "text"],
-        }),
-      });
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -343,12 +358,15 @@ Aspect ratio 1:1 for Instagram.`;
       }
 
       const imageData = await response.json();
-      const imageUrl = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      const extracted = extractImageFromGemini(imageData);
+      const imageUrl = extracted?.b64
+        ? `data:${extracted.mimeType};base64,${extracted.b64}`
+        : undefined;
 
       return new Response(JSON.stringify({
         success: true,
         imageUrl,
-        message: imageData.choices?.[0]?.message?.content,
+        message: extracted?.text || undefined,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -406,20 +424,17 @@ ${context ? `- Add the context explanation in smaller text at the bottom of the 
 - The design should evoke wisdom, leadership and spiritual depth
 - Make sure the entire quote is visible and readable`;
 
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: imagePrompt }] }],
+            generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+          }),
         },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash-image-preview",
-          messages: [
-            { role: "user", content: imagePrompt },
-          ],
-          modalities: ["image", "text"],
-        }),
-      });
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -431,9 +446,9 @@ ${context ? `- Add the context explanation in smaller text at the bottom of the 
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        if (response.status === 402) {
-          return new Response(JSON.stringify({ error: "AI credits depleted. Please add credits." }), {
-            status: 402,
+        if (response.status === 403) {
+          return new Response(JSON.stringify({ error: "Clé API Gemini invalide ou quota dépassé." }), {
+            status: 403,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
@@ -445,7 +460,10 @@ ${context ? `- Add the context explanation in smaller text at the bottom of the 
       }
 
       const imageData = await response.json();
-      const imageUrl = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      const extracted = extractImageFromGemini(imageData);
+      const imageUrl = extracted?.b64
+        ? `data:${extracted.mimeType};base64,${extracted.b64}`
+        : undefined;
 
       return new Response(JSON.stringify({
         success: true,
