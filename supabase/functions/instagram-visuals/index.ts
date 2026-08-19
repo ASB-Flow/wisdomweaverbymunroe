@@ -16,7 +16,6 @@ interface Body {
   size?: string;
 }
 
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -58,8 +57,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY non configurée");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY non configurée");
 
     const body: Body = await req.json();
 
@@ -101,37 +100,31 @@ Réponds UNIQUEMENT en JSON valide :
   "caption": "Légende Instagram (150-400 caractères) avec emojis et 5 hashtags en fin"
 }`;
 
-
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents: [{ role: "user", parts: [{ text: `Sujet : ${subject}\n${body.theme ? `Thème : ${body.theme}\n` : ""}Génère exactement ${count} sections.` }] }],
+            generationConfig: { temperature: 1 },
+          }),
         },
-        body: JSON.stringify({
-          model: "google/gemini-3.6-flash",
-          messages: [
-            { role: "system", content: systemPrompt },
-            {
-              role: "user",
-              content: `Sujet : ${subject}\n${body.theme ? `Thème : ${body.theme}\n` : ""}Génère exactement ${count} sections.`,
-            },
-          ],
-        }),
-      });
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("AI Gateway error:", response.status, errorText);
+        console.error("Gemini API error:", response.status, errorText);
         if (response.status === 429) {
           return new Response(JSON.stringify({ error: "Limite de requêtes atteinte, réessayez plus tard." }), {
             status: 429,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        if (response.status === 402) {
-          return new Response(JSON.stringify({ error: "Crédits IA épuisés." }), {
-            status: 402,
+        if (response.status === 403) {
+          return new Response(JSON.stringify({ error: "Clé API Gemini invalide ou quota dépassé." }), {
+            status: 403,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
@@ -142,7 +135,7 @@ Réponds UNIQUEMENT en JSON valide :
       }
 
       const aiData = await response.json();
-      const content: string = aiData.choices?.[0]?.message?.content ?? "";
+      const content: string = aiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
       let parsed: unknown;
       try {
         const clean = content.trim()
@@ -176,8 +169,13 @@ Réponds UNIQUEMENT en JSON valide :
         });
       }
 
-      const allowedSizes = ["1024x1024", "1024x1536", "1536x1024"];
-      const size = allowedSizes.includes(body.size ?? "") ? body.size! : "1024x1536";
+      // Map requested size to Imagen aspect ratio
+      const sizeToRatio: Record<string, string> = {
+        "1024x1024": "1:1",
+        "1024x1536": "9:16",
+        "1536x1024": "16:9",
+      };
+      const aspectRatio = sizeToRatio[body.size ?? ""] ?? "9:16";
 
       const prompt = `Instagram BACKGROUND image, NO TEXT of any kind, no letters, no words, no logos.
 ${body.imageIdea ? `Main subject: ${body.imageIdea}.` : ""}
@@ -186,21 +184,17 @@ ${body.sectionText ? `Mood inspired by this idea (do not write it): "${body.sect
 The center of the image must stay visually calm and uncluttered so that text can be overlaid on top.
 Cinematic, elegant, high-end editorial quality, subtle grain.`;
 
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            instances: [{ prompt }],
+            parameters: { sampleCount: 1, aspectRatio },
+          }),
         },
-        body: JSON.stringify({
-          model: "openai/gpt-image-2",
-          prompt,
-          size,
-          quality: "low",
-          n: 1,
-        }),
-      });
-
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -211,9 +205,9 @@ Cinematic, elegant, high-end editorial quality, subtle grain.`;
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        if (response.status === 402) {
-          return new Response(JSON.stringify({ error: "Crédits IA épuisés." }), {
-            status: 402,
+        if (response.status === 403) {
+          return new Response(JSON.stringify({ error: "Clé API Gemini invalide ou génération d'images non activée." }), {
+            status: 403,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
@@ -224,7 +218,7 @@ Cinematic, elegant, high-end editorial quality, subtle grain.`;
       }
 
       const imageData = await response.json();
-      const b64 = imageData?.data?.[0]?.b64_json;
+      const b64 = imageData?.predictions?.[0]?.bytesBase64Encoded;
       if (!b64) {
         return new Response(JSON.stringify({ error: "Aucune image renvoyée" }), {
           status: 502,
