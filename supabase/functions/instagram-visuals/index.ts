@@ -250,6 +250,26 @@ Cinematic, elegant, high-end editorial quality, subtle grain.`;
       }
 
       if (!b64) {
+        // Fallback gratuit (sans clé) quand le quota Google image est indisponible
+        try {
+          const [w, h] = (body.size ?? "1024x1536").split("x").map((n) => parseInt(n, 10));
+          const fbUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w || 1024}&height=${h || 1536}&nologo=true&model=flux&seed=${Math.floor(Math.random() * 1e6)}`;
+          const fbRes = await fetch(fbUrl);
+          if (fbRes.ok) {
+            const buf = new Uint8Array(await fbRes.arrayBuffer());
+            let bin = "";
+            for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+            const fbB64 = btoa(bin);
+            console.log("Image generated via fallback provider");
+            return new Response(JSON.stringify({ success: true, imageUrl: `data:image/jpeg;base64,${fbB64}`, fallback: true }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+          console.error("Fallback image provider failed:", fbRes.status);
+        } catch (e) {
+          console.error("Fallback image provider error:", e);
+        }
+
         if (lastStatus === 429) {
           return new Response(JSON.stringify({
             error: "La génération d'images n'est pas incluse dans le quota gratuit de votre clé Google. Activez la facturation sur votre projet Google AI Studio pour l'utiliser.",
@@ -270,6 +290,7 @@ Cinematic, elegant, high-end editorial quality, subtle grain.`;
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+
 
       console.log("Image generated via", usedPredict ? "predict" : "generateContent");
       return new Response(JSON.stringify({ success: true, imageUrl: `data:image/png;base64,${b64}` }), {
