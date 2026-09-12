@@ -177,12 +177,26 @@ Réponds UNIQUEMENT en JSON valide :
       };
       const aspectRatio = sizeToRatio[body.size ?? ""] ?? "9:16";
 
-      const prompt = `Instagram BACKGROUND image, NO TEXT of any kind, no letters, no words, no logos.
-${body.imageIdea ? `Main subject: ${body.imageIdea}.` : ""}
-Style: ${stylePrompt}.
-${body.sectionText ? `Mood inspired by this idea (do not write it): "${body.sectionText}".` : ""}
-The center of the image must stay visually calm and uncluttered so that text can be overlaid on top.
-Cinematic, elegant, high-end editorial quality, subtle grain.`;
+      const visualBrief = (body.imageIdea ?? "").trim();
+      const prompt = `Create a photorealistic editorial image for an Instagram carousel.
+
+MANDATORY PRIMARY SCENE — reproduce this description faithfully and literally:
+${visualBrief || "A symbolic, cinematic scene inspired by the editorial message."}
+
+COMPOSITION REQUIREMENTS:
+- The requested subject, number of people, actions, body language, camera direction, focus and contrast are mandatory.
+- If people appear, depict Black African adults with natural, realistic features.
+- Keep the main subject clearly recognizable and in sharp focus when the brief requests it.
+- Motion blur applies only to moving people or objects; never blur the main stationary subject.
+- Preserve useful negative space in the upper or lower third for an editorial text overlay, without removing or weakening the requested scene.
+
+VISUAL STYLE:
+${stylePrompt}.
+${body.sectionText ? `Emotional context only: "${body.sectionText}". Do not replace the mandatory scene with this context.` : ""}
+Cinematic photography, believable lighting, natural anatomy, high-end African editorial campaign, subtle film grain.
+
+STRICT EXCLUSIONS:
+No text, no letters, no words, no captions, no logos, no watermark, no poster typography, no duplicated people, no distorted faces or hands.`;
 
       // Discover which image-capable models this API key can use
       let response: Response | null = null;
