@@ -39,7 +39,7 @@ async function fetchYouTubeMetadata(videoId: string) {
   return await response.json();
 }
 
-const TEXT_MODEL = "gemini-2.5-flash";
+const TEXT_MODEL = "gemini-3.6-flash";
 const IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation";
 
 /** Extract the first inline image (base64) from a Gemini image-generation response. */
