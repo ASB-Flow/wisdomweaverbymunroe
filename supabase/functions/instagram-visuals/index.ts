@@ -184,51 +184,93 @@ ${body.sectionText ? `Mood inspired by this idea (do not write it): "${body.sect
 The center of the image must stay visually calm and uncluttered so that text can be overlaid on top.
 Cinematic, elegant, high-end editorial quality, subtle grain.`;
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${GEMINI_API_KEY}`,
-        {
+      // Discover which image-capable models this API key can use
+      let response: Response | null = null;
+      let lastError = "";
+      let usedPredict = false;
+
+      const listRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}&pageSize=200`,
+      );
+      const listJson = listRes.ok ? await listRes.json() : { models: [] };
+      const models: Array<{ name: string; supportedGenerationMethods?: string[] }> = listJson?.models ?? [];
+
+      const predictModels = models
+        .filter((m) => m.name?.includes("imagen") && (m.supportedGenerationMethods ?? []).includes("predict"))
+        .map((m) => m.name.replace(/^models\//, ""));
+      const genContentImageModels = models
+        .filter((m) => /image/i.test(m.name) && (m.supportedGenerationMethods ?? []).includes("generateContent"))
+        .map((m) => m.name.replace(/^models\//, ""));
+
+      const candidates = [
+        ...genContentImageModels,
+        ...predictModels,
+      ];
+      if (candidates.length === 0) {
+        candidates.push("gemini-2.5-flash-image", "imagen-3.0-generate-002");
+      }
+      console.log("Image model candidates:", candidates.join(", "));
+
+      let b64: string | undefined;
+
+      for (const model of candidates.slice(0, 4)) {
+        const isPredict = model.includes("imagen");
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${isPredict ? "predict" : "generateContent"}?key=${GEMINI_API_KEY}`;
+        const payload = isPredict
+          ? { instances: [{ prompt }], parameters: { sampleCount: 1, aspectRatio } }
+          : {
+              contents: [{ role: "user", parts: [{ text: `${prompt}\nAspect ratio: ${aspectRatio}.` }] }],
+              generationConfig: { responseModalities: ["IMAGE"] },
+            };
+
+        response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            instances: [{ prompt }],
-            parameters: { sampleCount: 1, aspectRatio },
-          }),
-        },
-      );
+          body: JSON.stringify(payload),
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Image generation error:", response.status, errorText);
-        if (response.status === 429) {
+        if (!response.ok) {
+          lastError = await response.text();
+          console.error("Image generation error:", model, response.status, lastError);
+          if (response.status === 429 || response.status === 403) break;
+          continue;
+        }
+
+        const imageData = await response.json();
+        usedPredict = isPredict;
+        b64 = isPredict
+          ? imageData?.predictions?.[0]?.bytesBase64Encoded
+          : imageData?.candidates?.[0]?.content?.parts?.find((p: { inlineData?: { data?: string } }) => p?.inlineData?.data)?.inlineData?.data;
+        if (b64) break;
+        lastError = "Aucune image renvoyée par " + model;
+        console.error(lastError);
+      }
+
+      if (!b64) {
+        const status = response && !response.ok ? response.status : 502;
+        if (status === 429) {
           return new Response(JSON.stringify({ error: "Limite de requêtes atteinte, réessayez plus tard." }), {
             status: 429,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        if (response.status === 403) {
-          return new Response(JSON.stringify({ error: "Clé API Gemini invalide ou génération d'images non activée." }), {
+        if (status === 403) {
+          return new Response(JSON.stringify({ error: "Clé API Gemini invalide ou génération d'images non activée sur ce compte." }), {
             status: 403,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        return new Response(JSON.stringify({ error: "Génération de l'image échouée", details: errorText }), {
-          status: response.status,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const imageData = await response.json();
-      const b64 = imageData?.predictions?.[0]?.bytesBase64Encoded;
-      if (!b64) {
-        return new Response(JSON.stringify({ error: "Aucune image renvoyée" }), {
+        return new Response(JSON.stringify({ error: "Génération de l'image échouée", details: lastError }), {
           status: 502,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
+      console.log("Image generated via", usedPredict ? "predict" : "generateContent");
       return new Response(JSON.stringify({ success: true, imageUrl: `data:image/png;base64,${b64}` }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+
     }
 
     return new Response(JSON.stringify({ error: "Type de requête invalide" }), {
