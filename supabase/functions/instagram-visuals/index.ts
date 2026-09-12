@@ -212,8 +212,9 @@ Cinematic, elegant, high-end editorial quality, subtle grain.`;
       console.log("Image model candidates:", candidates.join(", "));
 
       let b64: string | undefined;
+      let lastStatus = 502;
 
-      for (const model of candidates.slice(0, 4)) {
+      for (const model of candidates.slice(0, 6)) {
         const isPredict = model.includes("imagen");
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${isPredict ? "predict" : "generateContent"}?key=${GEMINI_API_KEY}`;
         const payload = isPredict
@@ -231,10 +232,12 @@ Cinematic, elegant, high-end editorial quality, subtle grain.`;
 
         if (!response.ok) {
           lastError = await response.text();
+          lastStatus = response.status;
           console.error("Image generation error:", model, response.status, lastError);
-          if (response.status === 429 || response.status === 403) break;
+          // Quota (429) and permission (403) are per-model on Gemini: try the next one.
           continue;
         }
+
 
         const imageData = await response.json();
         usedPredict = isPredict;
