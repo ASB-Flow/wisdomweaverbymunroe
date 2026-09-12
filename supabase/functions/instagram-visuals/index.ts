@@ -250,19 +250,21 @@ Cinematic, elegant, high-end editorial quality, subtle grain.`;
       }
 
       if (!b64) {
-        const status = response && !response.ok ? response.status : 502;
-        if (status === 429) {
-          return new Response(JSON.stringify({ error: "Limite de requêtes atteinte, réessayez plus tard." }), {
+        if (lastStatus === 429) {
+          return new Response(JSON.stringify({
+            error: "La génération d'images n'est pas incluse dans le quota gratuit de votre clé Google. Activez la facturation sur votre projet Google AI Studio pour l'utiliser.",
+          }), {
             status: 429,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        if (status === 403) {
+        if (lastStatus === 403) {
           return new Response(JSON.stringify({ error: "Clé API Gemini invalide ou génération d'images non activée sur ce compte." }), {
             status: 403,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
+
         return new Response(JSON.stringify({ error: "Génération de l'image échouée", details: lastError }), {
           status: 502,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
